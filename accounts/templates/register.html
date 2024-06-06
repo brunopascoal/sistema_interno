@@ -1,0 +1,30 @@
+{% extends "base.html" %} {% block content %}
+<style>
+  .centered-form {
+    height: 200vh;
+  }
+</style>
+<div class="d-flex justify-content-center align-items-center centered-form">
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+      <label> Usuário:</label>
+      {{ user_form.username.errors}} {{ user_form.username}}
+    </div>
+
+    <div class="form-group">
+      <label> Senha:</label>
+      {{ user_form.password1.errors}} {{ user_form.password1}}
+    </div>
+
+    <div class="form-group">
+      <label> Confirmação de senha:</label>
+      {{ user_form.password2.errors}} {{ user_form.password2}}
+    </div>
+
+    <div class="form-group">
+      <input type="submit" value="Cadastrar" />
+    </div>
+  </form>
+</div>
+{% endblock %}
