@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<h2>Realizar Avaliação</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ evaluation_form.as_p }}
+    {% for question in questions %}
+        <div>
+            <label for="question_{{ question.id }}">{{ question.text }}</label>
+            <select name="question_{{ question.id }}" id="question_{{ question.id }}">
+                {% for i in "12345" %}
+                    <option value="{{ i }}">{{ i }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    {% endfor %}
+    <button type="submit">Salvar Avaliação</button>
+</form>
+{% endblock %}

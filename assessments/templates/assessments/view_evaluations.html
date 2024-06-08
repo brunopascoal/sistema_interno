@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<h2>Avaliações Realizadas</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Avaliador</th>
+            <th>Avaliado</th>
+            <th>Cliente</th>
+            <th>Data</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for evaluation in evaluations %}
+        <tr>
+            <td>{{ evaluation.evaluator.username }}</td>
+            <td>{{ evaluation.evaluatee.username }}</td>
+            <td>{{ evaluation.client.name }}</td>
+            <td>{{ evaluation.date }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
