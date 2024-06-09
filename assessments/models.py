@@ -1,4 +1,3 @@
-# models.py (assessments)
 from django.db import models
 from django.conf import settings
 from accounts.models import Client
@@ -9,14 +8,21 @@ class Question(models.Model):
     def __str__(self):
         return self.text
 
-class Evaluation(models.Model):
-    evaluator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='evaluations_given')
-    evaluatee = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='evaluations_received')
+class EvaluationSchedule(models.Model):
+    evaluator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='evaluation_schedules')
+    evaluatee = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='evaluation_scheduled')
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
-    date = models.DateField(auto_now_add=True)
+    date_scheduled = models.DateField()
 
     def __str__(self):
-        return f"Evaluation by {self.evaluator} for {self.evaluatee} on {self.date}"
+        return f"Evaluation scheduled by {self.evaluator} for {self.evaluatee} on {self.date_scheduled}"
+
+class Evaluation(models.Model):
+    schedule = models.OneToOneField(EvaluationSchedule, on_delete=models.CASCADE)
+    date_completed = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Evaluation by {self.schedule.evaluator} for {self.schedule.evaluatee} on {self.date_completed}"
 
 class Answer(models.Model):
     evaluation = models.ForeignKey(Evaluation, on_delete=models.CASCADE)

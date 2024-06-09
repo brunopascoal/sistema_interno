@@ -1,21 +1,46 @@
-{% extends "base.html" %}
-{% load static %}
-
-{% block content %}
-<h2>Realizar Avaliação</h2>
-<form method="post">
+{% extends "base.html" %} {% load static %} {% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4">Realizar Avaliação</h2>
+  {% if pending_schedules %}
+  <form method="post" class="needs-validation" novalidate>
     {% csrf_token %}
-    {{ evaluation_form.as_p }}
-    {% for question in questions %}
-        <div>
-            <label for="question_{{ question.id }}">{{ question.text }}</label>
-            <select name="question_{{ question.id }}" id="question_{{ question.id }}">
-                {% for i in "12345" %}
-                    <option value="{{ i }}">{{ i }}</option>
-                {% endfor %}
-            </select>
-        </div>
-    {% endfor %}
-    <button type="submit">Salvar Avaliação</button>
-</form>
+    <div class="form-group">
+      <label for="schedule_id">Selecione a Avaliação:</label>
+      <select class="form-control" name="schedule_id" id="schedule_id" required>
+        <option value="">Selecione uma avaliação</option>
+        {% for schedule in pending_schedules %}
+        <option value="{{ schedule.id }}">
+          Avaliação para {{schedule.evaluatee.first_name}} em
+          {{schedule.client.name }} - Agendada para
+          {{schedule.date_scheduled|date:"d/m/Y"}}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+    {% if questions %}
+    <div id="questions">
+      {% for question in questions %}
+      <div class="form-group">
+        <label for="question_{{ question.id }}">{{ question.text }}</label>
+        <select
+          class="form-control"
+          name="question_{{ question.id }}"
+          id="question_{{ question.id }}"
+        >
+          {% for i in "12345" %}
+          <option value="{{ i }}">{{ i }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      {% endfor %}
+    </div>
+    <button type="submit" class="btn btn-primary">Salvar Avaliação</button>
+    {% endif %} {% if error %}
+    <p class="text-danger">{{ error }}</p>
+    {% endif %}
+  </form>
+  {% else %}
+  <p class="text-center">Você não tem avaliações pendentes.</p>
+  {% endif %}
+</div>
 {% endblock %}

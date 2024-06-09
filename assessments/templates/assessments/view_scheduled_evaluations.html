@@ -1,0 +1,31 @@
+{% extends "base.html" %} {% load static %} {% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4">Avaliações Agendadas</h2>
+  {% if scheduled_evaluations %}
+  <div class="table-responsive">
+    <table class="table table-striped table-hover">
+      <thead class="thead-dark">
+        <tr>
+          <th>Avaliador</th>
+          <th>Avaliado</th>
+          <th>Cliente</th>
+          <th>Data Agendada</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for schedule in scheduled_evaluations %}
+        <tr>
+          <td>{{ schedule.evaluator.username }}</td>
+          <td>{{ schedule.evaluatee.username }}</td>
+          <td>{{ schedule.client.name }}</td>
+          <td>{{ schedule.date_scheduled|date:"d/m/Y" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="text-center">Não há avaliações agendadas.</p>
+  {% endif %}
+</div>
+{% endblock %}
