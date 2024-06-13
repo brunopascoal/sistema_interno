@@ -1,8 +1,9 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
+from .forms import ClientForm
+from .models import Client
 
 
 def register_view(request):
@@ -37,3 +38,28 @@ def logout_view(request):
 @login_required(login_url='login')
 def homepage_view(request):
     return render(request, "homepage.html")
+
+@login_required
+def list_clients(request):
+    clients = Client.objects.all()
+    return render(request, 'clients/list_clients.html', {'clients': clients})
+
+@login_required
+def edit_client(request, client_id):
+    client = get_object_or_404(Client, id=client_id)
+    if request.method == 'POST':
+        form = ClientForm(request.POST, instance=client)
+        if form.is_valid():
+            form.save()
+            return redirect('list_clients')
+    else:
+        form = ClientForm(instance=client)
+    return render(request, 'clients/edit_client.html', {'form': form, 'client': client})
+
+@login_required
+def delete_client(request, client_id):
+    client = get_object_or_404(Client, id=client_id)
+    if request.method == 'POST':
+        client.delete()
+        return redirect('list_clients')
+    return render(request, 'clients/delete_client.html', {'client': client})

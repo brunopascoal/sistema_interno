@@ -1,0 +1,11 @@
+{% extends "base.html" %} {% load static %} {% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4">Excluir Cliente</h2>
+  <p>Tem certeza de que deseja excluir o cliente "{{ client.name }}"?</p>
+  <form method="post" class="needs-validation" novalidate>
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Excluir</button>
+    <a href="{% url 'list_clients' %}" class="btn btn-secondary">Cancelar</a>
+  </form>
+</div>
+{% endblock %}

@@ -1,46 +1,63 @@
 {% extends "base.html" %} {% load static %} {% block content %}
-<div class="container mt-5">
-  <h2 class="mb-4">Realizar Avaliação</h2>
-  {% if pending_schedules %}
-  <form method="post" class="needs-validation" novalidate>
-    {% csrf_token %}
-    <div class="form-group">
-      <label for="schedule_id">Selecione a Avaliação:</label>
-      <select class="form-control" name="schedule_id" id="schedule_id" required>
-        <option value="">Selecione uma avaliação</option>
-        {% for schedule in pending_schedules %}
-        <option value="{{ schedule.id }}">
-          Avaliação para {{schedule.evaluatee.first_name}} em
-          {{schedule.client.name }} - Agendada para
-          {{schedule.date_scheduled|date:"d/m/Y"}}
-        </option>
-        {% endfor %}
-      </select>
-    </div>
-    {% if questions %}
-    <div id="questions">
-      {% for question in questions %}
-      <div class="form-group">
-        <label for="question_{{ question.id }}">{{ question.text }}</label>
-        <select
-          class="form-control"
-          name="question_{{ question.id }}"
-          id="question_{{ question.id }}"
-        >
-          {% for i in "12345" %}
-          <option value="{{ i }}">{{ i }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      {% endfor %}
-    </div>
-    <button type="submit" class="btn btn-primary">Salvar Avaliação</button>
-    {% endif %} {% if error %}
-    <p class="text-danger">{{ error }}</p>
-    {% endif %}
-  </form>
-  {% else %}
-  <p class="text-center">Você não tem avaliações pendentes.</p>
+<h2>Realizar Avaliação</h2>
+{% if pending_schedules %}
+<form method="post" id="evaluationForm">
+  {% csrf_token %}
+  <label for="schedule_id">Selecione a Avaliação:</label>
+  <select name="schedule_id" id="schedule_id" required>
+    <option value="">Selecione uma avaliação</option>
+    {% for schedule in pending_schedules %}
+    <option value="{{ schedule.id }}">
+      Avaliação para {{ schedule.evaluatee.first_name }} {{
+      schedule.evaluatee.last_name }} em {{ schedule.client.name }} (Agendada
+      para {{ schedule.date_scheduled|date:"d/m/Y" }})
+    </option>
+    {% endfor %}
+  </select>
+  <div id="questionsContainer" style="display: none">
+    <div id="questions"></div>
+    <button type="submit">Salvar Avaliação</button>
+  </div>
+  {% if error %}
+  <p style="color: red">{{ error }}</p>
   {% endif %}
-</div>
+</form>
+{% else %}
+<p>Você não tem avaliações pendentes.</p>
+{% endif %}
+
+<script>
+  document
+    .getElementById("schedule_id")
+    .addEventListener("change", function () {
+      var scheduleId = this.value;
+      if (scheduleId) {
+        fetch(`/assessments/get_questions/${scheduleId}/`)
+          .then((response) => response.json())
+          .then((data) => {
+            var questionsContainer =
+              document.getElementById("questionsContainer");
+            var questionsDiv = document.getElementById("questions");
+            questionsDiv.innerHTML = "";
+            data.questions.forEach(function (question) {
+              var questionDiv = document.createElement("div");
+              questionDiv.innerHTML = `
+                        <label for="question_${question.id}">${question.text}</label>
+                        <select name="question_${question.id}" id="question_${question.id}">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                    `;
+              questionsDiv.appendChild(questionDiv);
+            });
+            questionsContainer.style.display = "block";
+          });
+      } else {
+        document.getElementById("questionsContainer").style.display = "none";
+      }
+    });
+</script>
 {% endblock %}

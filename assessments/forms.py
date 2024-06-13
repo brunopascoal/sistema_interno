@@ -5,12 +5,12 @@ from accounts.models import CustomUser
 class EvaluationScheduleForm(forms.ModelForm):
     class Meta:
         model = EvaluationSchedule
-        fields = ['evaluator', 'evaluatee', 'client', 'date_scheduled']
+        fields = ['evaluatee', 'client', 'date_scheduled', 'evaluation_type']
 
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user')
         super().__init__(*args, **kwargs)
-        self.fields['evaluator'].queryset = CustomUser.objects.filter(role__name='Avaliador')
-        self.fields['evaluatee'].queryset = CustomUser.objects.filter(role__name='Avaliado')
+        self.fields['evaluatee'].queryset = CustomUser.objects.filter(department=user.department, role=user.role)
 
 class EvaluationForm(forms.ModelForm):
     class Meta:
