@@ -15,6 +15,7 @@
         {% for answer in answers %}
         <li class="list-group-item">
           <strong>{{ answer.question.text }}</strong>: {{ answer.score }}
+          Comentario: {{ answer.comment }}
         </li>
         {% endfor %}
       </ul>

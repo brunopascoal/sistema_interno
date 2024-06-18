@@ -31,7 +31,8 @@ def create_evaluation(request):
             questions = Question.objects.filter(department=schedule.department, role=schedule.role)
             for question in questions:
                 score = request.POST.get(f'question_{question.id}')
-                Answer.objects.create(evaluation=evaluation, question=question, score=score)
+                comment = request.POST.get(f'comment_{question.id}')
+                Answer.objects.create(evaluation=evaluation, question=question, score=score, comment=comment)
             return redirect('view_evaluations')
     
     return render(request, 'assessments/create_evaluation.html', {

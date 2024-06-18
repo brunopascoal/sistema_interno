@@ -39,6 +39,7 @@ class Answer(models.Model):
     evaluation = models.ForeignKey(Evaluation, on_delete=models.CASCADE)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     score = models.IntegerField(choices=[(i, i) for i in range(1, 6)])
+    comment = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return f"Answer to {self.question} with score {self.score}"

@@ -1,30 +1,37 @@
 {% extends "base.html" %} {% load static %} {% block content %}
-<h2>Realizar Avaliação</h2>
-{% if pending_schedules %}
-<form method="post" id="evaluationForm">
-  {% csrf_token %}
-  <label for="schedule_id">Selecione a Avaliação:</label>
-  <select name="schedule_id" id="schedule_id" required>
-    <option value="">Selecione uma avaliação</option>
-    {% for schedule in pending_schedules %}
-    <option value="{{ schedule.id }}">
-      Avaliação para {{ schedule.evaluatee.first_name }} {{
-      schedule.evaluatee.last_name }} em {{ schedule.client.name }} (Agendada
-      para {{ schedule.date_scheduled|date:"d/m/Y" }})
-    </option>
-    {% endfor %}
-  </select>
-  <div id="questionsContainer" style="display: none">
-    <div id="questions"></div>
-    <button type="submit">Salvar Avaliação</button>
-  </div>
-  {% if error %}
-  <p style="color: red">{{ error }}</p>
+<div class="container mt-5">
+  <h2>Realizar Avaliação</h2>
+  {% if pending_schedules %}
+  <form method="post" id="evaluationForm" class="needs-validation" novalidate>
+    {% csrf_token %}
+    <div class="mb-3">
+      <label for="schedule_id" class="form-label">Selecione a Avaliação:</label>
+      <select name="schedule_id" id="schedule_id" class="form-select" required>
+        <option value="">Selecione uma avaliação</option>
+        {% for schedule in pending_schedules %}
+        <option value="{{ schedule.id }}">
+          Avaliação para {{ schedule.evaluatee.first_name }}
+          {{schedule.evaluatee.last_name}} em {{schedule.client.name}} (Agendada
+          para {{ schedule.date_scheduled|date:"d/m/Y" }})
+        </option>
+        {% endfor %}
+      </select>
+      <div class="invalid-feedback">Por favor, selecione uma avaliação.</div>
+    </div>
+    <div id="questionsContainer" style="display: none">
+      <div id="questions"></div>
+      <button type="submit" class="btn btn-primary mt-3">
+        Salvar Avaliação
+      </button>
+    </div>
+    {% if error %}
+    <div class="alert alert-danger mt-3">{{ error }}</div>
+    {% endif %}
+  </form>
+  {% else %}
+  <p>Você não tem avaliações pendentes.</p>
   {% endif %}
-</form>
-{% else %}
-<p>Você não tem avaliações pendentes.</p>
-{% endif %}
+</div>
 
 <script>
   document
@@ -41,15 +48,17 @@
             questionsDiv.innerHTML = "";
             data.questions.forEach(function (question) {
               var questionDiv = document.createElement("div");
+              questionDiv.classList.add("mb-3");
               questionDiv.innerHTML = `
-                        <label for="question_${question.id}">${question.text}</label>
-                        <select name="question_${question.id}" id="question_${question.id}">
+                        <label for="question_${question.id}" class="form-label">${question.text}</label>
+                        <select name="question_${question.id}" id="question_${question.id}" class="form-select" onchange="checkScore(${question.id})">
                             <option value="1">1</option>
                             <option value="2">2</option>
                             <option value="3">3</option>
                             <option value="4">4</option>
                             <option value="5">5</option>
                         </select>
+                        <textarea name="comment_${question.id}" id="comment_${question.id}" class="form-control mt-2" placeholder="Observação (necessário se a resposta for menor que 3)" style="display:none;"></textarea>
                     `;
               questionsDiv.appendChild(questionDiv);
             });
@@ -59,5 +68,16 @@
         document.getElementById("questionsContainer").style.display = "none";
       }
     });
+
+  function checkScore(questionId) {
+    var score = document.getElementById(`question_${questionId}`).value;
+    var comment = document.getElementById(`comment_${questionId}`);
+    if (score < 3) {
+      comment.style.display = "block";
+    } else {
+      comment.style.display = "none";
+      comment.value = ""; // Limpa o campo de comentário se não for necessário
+    }
+  }
 </script>
 {% endblock %}
