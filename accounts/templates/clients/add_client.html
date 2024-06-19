@@ -1,0 +1,11 @@
+{% extends "base.html" %} {% load static %} {% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4">Adicionar Cliente</h2>
+  <form method="post" class="needs-validation" novalidate>
+    {% csrf_token %}
+    <div class="form-group">{{ form.as_p }}</div>
+    <button type="submit" class="btn btn-success">Salvar</button>
+    <a href="{% url 'list_clients' %}" class="btn btn-secondary">Cancelar</a>
+  </form>
+</div>
+{% endblock %}

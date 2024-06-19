@@ -20,6 +20,7 @@ class CustomUser(AbstractUser):
 
 class Client(models.Model):
     name = models.CharField(max_length=255)
+    responsible = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name

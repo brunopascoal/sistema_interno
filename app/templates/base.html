@@ -29,18 +29,6 @@
         </div>
         <ul class="sidebar-nav">
           <li class="sidebar-item">
-            <a href="#" class="sidebar-link">
-              <i class="lni lni-user"></i>
-              <span>Profile</span>
-            </a>
-          </li>
-          <li class="sidebar-item">
-            <a href="#" class="sidebar-link">
-              <i class="lni lni-agenda"></i>
-              <span>Task</span>
-            </a>
-          </li>
-          <li class="sidebar-item">
             <a
               href="#"
               class="sidebar-link collapsed has-dropdown"
@@ -49,7 +37,7 @@
               aria-expanded="false"
               aria-controls="auth"
             >
-              <i class="lni lni-protection"></i>
+              <i class="lni lni-agenda"></i>
               <span>Avaliações</span>
             </a>
             <ul
@@ -91,8 +79,8 @@
               aria-expanded="false"
               aria-controls="client"
             >
-              <i class="lni lni-protection"></i>
-              <span>Clientes</span>
+              <i class="lni lni-briefcase-alt"></i>
+              <span>Gestão</span>
             </a>
             <ul
               id="client"
@@ -100,13 +88,19 @@
               data-bs-parent="#sidebar"
             >
               <li class="sidebar-item">
+                <a href="{% url 'list_users' %}" class="sidebar-link"
+                  >Usuários</a
+                >
+              </li>
+
+              <li class="sidebar-item">
                 <a href="{% url 'list_clients' %}" class="sidebar-link"
-                  >Visualizar Clientes</a
+                  >Clientes</a
                 >
               </li>
             </ul>
           </li>
-          <li class="sidebar-item">
+          <!-- <li class="sidebar-item">
             <a
               href="#"
               class="sidebar-link collapsed has-dropdown"
@@ -147,19 +141,7 @@
                 </ul>
               </li>
             </ul>
-          </li>
-          <li class="sidebar-item">
-            <a href="#" class="sidebar-link">
-              <i class="lni lni-popup"></i>
-              <span>Notification</span>
-            </a>
-          </li>
-          <li class="sidebar-item">
-            <a href="#" class="sidebar-link">
-              <i class="lni lni-cog"></i>
-              <span>Setting</span>
-            </a>
-          </li>
+          </li> -->
         </ul>
         <div class="sidebar-footer">
           <a href="{% url 'logout' %}" class="sidebar-link">

@@ -2,9 +2,44 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from .forms import ClientForm
-from .models import Client
+from .forms import ClientForm, CustomUserCreationForm, CustomUserChangeForm
+from .models import Client, CustomUser
 
+@login_required
+def list_users(request):
+    users = CustomUser.objects.all()
+    return render(request, 'users/list_users.html', {'users': users})
+
+@login_required
+def add_user(request):
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('list_users')
+    else:
+        form = CustomUserCreationForm()
+    return render(request, 'users/add_user.html', {'form': form})
+
+@login_required
+def edit_user(request, user_id):
+    user = get_object_or_404(CustomUser, id=user_id)
+    if request.method == 'POST':
+        form = CustomUserChangeForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            return redirect('list_users')
+    else:
+        form = CustomUserChangeForm(instance=user)
+    return render(request, 'users/edit_user.html', {'form': form, 'user': user})
+
+@login_required
+def delete_user(request, user_id):
+    user = get_object_or_404(CustomUser, id=user_id)
+    if request.method == 'POST':
+        user.delete()
+        return redirect('list_users')
+    return render(request, 'users/delete_user.html', {'user': user})
 
 def register_view(request):
     user_form = UserCreationForm()
@@ -38,6 +73,17 @@ def logout_view(request):
 @login_required(login_url='login')
 def homepage_view(request):
     return render(request, "homepage.html")
+
+@login_required
+def add_client(request):
+    if request.method == 'POST':
+        form = ClientForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('list_clients')
+    else:
+        form = ClientForm()
+    return render(request, 'clients/add_client.html', {'form': form})
 
 @login_required
 def list_clients(request):
