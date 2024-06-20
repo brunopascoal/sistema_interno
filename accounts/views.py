@@ -60,11 +60,13 @@ def login_view(request):
             login(request, user)
             return redirect('homepage')
         else:
-            login_form = AuthenticationForm()
+            login_form = AuthenticationForm(request, data=request.POST)
+            error_message = "Usuário ou senha incorretos."
     else:
         login_form = AuthenticationForm()
+        error_message = None
 
-    return render(request, "login.html", {'login_form': login_form})
+    return render(request, "login.html", {'login_form': login_form, 'error_message': error_message})
 
 def logout_view(request):
     logout(request)

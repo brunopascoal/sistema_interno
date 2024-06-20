@@ -28,9 +28,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-CSRF_TRUSTED_ORIGINS = [
-    'https://fda5-177-47-86-239.ngrok-free.app',  # Adicione o URL do ngrok aqui
-]
+CSRF_TRUSTED_ORIGINS = []
 
 # Application definition
 
