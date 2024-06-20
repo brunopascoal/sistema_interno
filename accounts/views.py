@@ -41,15 +41,15 @@ def delete_user(request, user_id):
         return redirect('list_users')
     return render(request, 'users/delete_user.html', {'user': user})
 
-def register_view(request):
-    user_form = UserCreationForm()
-    if request.method == "POST":
+# def register_view(request):
+#     user_form = UserCreationForm()
+#     if request.method == "POST":
 
-        user_form = UserCreationForm(request.POST)
-        if user_form.is_valid():
-            user_form.save()
-            return redirect("login")
-    return render(request, "register.html", {"user_form": user_form})
+#         user_form = UserCreationForm(request.POST)
+#         if user_form.is_valid():
+#             user_form.save()
+#             return redirect("login")
+#     return render(request, "register.html", {"user_form": user_form})
 
 def login_view(request):
     if request.method == "POST":
