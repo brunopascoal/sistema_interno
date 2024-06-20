@@ -12,7 +12,7 @@
 
 1. Clone o projeto:
    ```bash
-   git clone https://github.com/seu-usuario/seu-projeto.git
+   git clone https://github.com/brunopascoal/sistema_interno
    ```
 2. Navegue até o diretório do projeto:
    ```bash
