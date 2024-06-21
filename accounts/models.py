@@ -9,7 +9,13 @@ class Department(models.Model):
         return self.name
 
 class Role(models.Model):
+    ROLE_TYPE_CHOICES = (
+        (1, 'Sênior'),
+        (2, 'Assistente'),
+    )
+
     name = models.CharField(max_length=255)
+    role_type = models.IntegerField(choices=ROLE_TYPE_CHOICES)
 
     def __str__(self):
         return self.name

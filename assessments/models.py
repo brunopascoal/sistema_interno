@@ -4,8 +4,8 @@ from accounts.models import Client, Department, Role
 
 class Question(models.Model):
     text = models.CharField(max_length=255)
-    department = models.ForeignKey(Department, on_delete=models.CASCADE, default=1)  # Defina o valor padrão aqui
-    role = models.ForeignKey(Role, on_delete=models.CASCADE, default=1)  # Defina o valor padrão aqui
+    department = models.ForeignKey(Department, on_delete=models.CASCADE)
+    role_type = models.IntegerField(choices=Role.ROLE_TYPE_CHOICES)
 
     def __str__(self):
         return self.text

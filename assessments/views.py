@@ -10,7 +10,7 @@ def schedule_evaluation(request):
         form = EvaluationScheduleForm(request.POST, user=request.user)
         if form.is_valid():
             schedule = form.save(commit=False)
-            schedule.evaluator = request.user  # Define o avaliador como o usuário logado
+            #schedule.evaluator = request.user  # Define o avaliador como o usuário logado
             schedule.department = request.user.department  # Define o departamento automaticamente
             schedule.role = request.user.role  # Define o cargo automaticamente
             schedule.save()
@@ -28,7 +28,8 @@ def create_evaluation(request):
         if schedule_id:
             schedule = get_object_or_404(EvaluationSchedule, id=schedule_id)
             evaluation = Evaluation.objects.create(schedule=schedule)
-            questions = Question.objects.filter(department=schedule.department, role=schedule.role)
+            role_type = schedule.evaluatee.role.role_type
+            questions = Question.objects.filter(department=schedule.department, role_type=role_type)
             for question in questions:
                 score = request.POST.get(f'question_{question.id}')
                 comment = request.POST.get(f'comment_{question.id}')
@@ -66,6 +67,7 @@ def evaluation_detail(request, evaluation_id):
 @login_required
 def get_questions(request, schedule_id):
     schedule = get_object_or_404(EvaluationSchedule, id=schedule_id)
-    questions = Question.objects.filter(department=schedule.department, role=schedule.role)
+    role_type = schedule.evaluatee.role.role_type
+    questions = Question.objects.filter(department=schedule.department, role_type=role_type)
     questions_data = [{'id': question.id, 'text': question.text} for question in questions]
     return JsonResponse({'questions': questions_data})

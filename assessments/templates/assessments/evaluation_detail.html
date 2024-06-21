@@ -3,7 +3,8 @@
   <h2 class="mb-4">Detalhes da Avaliação</h2>
   <div class="card">
     <div class="card-header">
-      Avaliação para {{evaluation.schedule.evaluatee.username}} por
+      Avaliação para {{evaluation.schedule.evaluatee.first_name}}
+      {{evaluation.schedule.evaluatee.last_name}} por
       {{evaluation.schedule.evaluator.first_name}}
       {{evaluation.schedule.evaluator.last_name }} em
       {{evaluation.schedule.client.name }} -
@@ -14,8 +15,11 @@
       <ul class="list-group">
         {% for answer in answers %}
         <li class="list-group-item">
-          <strong>{{ answer.question.text }}</strong>: {{ answer.score }}
-          Comentario: {{ answer.comment }}
+          <strong>{{ answer.question.text }} </strong>: {{ answer.score }}
+          <br />
+          {% if answer.comment %}
+          <strong>Comentario: {{ answer.comment }}</strong>
+          {% endif %}
         </li>
         {% endfor %}
       </ul>

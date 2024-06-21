@@ -34,45 +34,45 @@
 </div>
 
 <script>
-  document
-    .getElementById("schedule_id")
-    .addEventListener("change", function () {
-      var scheduleId = this.value;
-      if (scheduleId) {
-        fetch(`/assessments/get_questions/${scheduleId}/`)
-          .then((response) => response.json())
-          .then((data) => {
-            var questionsContainer =
-              document.getElementById("questionsContainer");
-            var questionsDiv = document.getElementById("questions");
-            questionsDiv.innerHTML = "";
-            data.questions.forEach(function (question) {
-              var questionDiv = document.createElement("div");
-              questionDiv.classList.add("mb-3");
-              questionDiv.innerHTML = `
-                        <label for="question_${question.id}" class="form-label">${question.text}</label>
-                        <select name="question_${question.id}" id="question_${question.id}" class="form-select" onchange="checkScore(${question.id})">
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                        </select>
-                        <textarea name="comment_${question.id}" id="comment_${question.id}" class="form-control mt-2" placeholder="Observação (necessário se a resposta for menor que 3)" style="display:none;"></textarea>
-                    `;
-              questionsDiv.appendChild(questionDiv);
-            });
-            questionsContainer.style.display = "block";
+  document.getElementById("schedule_id").addEventListener("change", function () {
+    var scheduleId = this.value;
+    if (scheduleId) {
+      fetch(`/assessments/get_questions/${scheduleId}/`)
+        .then((response) => response.json())
+        .then((data) => {
+          var questionsContainer = document.getElementById("questionsContainer");
+          var questionsDiv = document.getElementById("questions");
+          questionsDiv.innerHTML = "";
+          data.questions.forEach(function (question) {
+            var questionDiv = document.createElement("div");
+            questionDiv.classList.add("mb-3");
+            questionDiv.innerHTML = `
+              <label for="question_${question.id}" class="form-label">${question.text}</label>
+              <select name="question_${question.id}" id="question_${question.id}" class="form-select" onchange="checkScore(${question.id})" required>
+                <option value="">Selecione uma nota</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+              </select>
+              <div class="invalid-feedback">Por favor, selecione uma nota.</div>
+              <textarea name="comment_${question.id}" id="comment_${question.id}" class="form-control mt-2" placeholder="Observação (necessário se a resposta for menor que 3)" style="display:none;" required></textarea>
+              <div class="invalid-feedback">Por favor, adicione um comentário se a nota for menor que 3.</div>
+            `;
+            questionsDiv.appendChild(questionDiv);
           });
-      } else {
-        document.getElementById("questionsContainer").style.display = "none";
-      }
-    });
+          questionsContainer.style.display = "block";
+        });
+    } else {
+      document.getElementById("questionsContainer").style.display = "none";
+    }
+  });
 
   function checkScore(questionId) {
     var score = document.getElementById(`question_${questionId}`).value;
     var comment = document.getElementById(`comment_${questionId}`);
-    if (score < 3) {
+    if (score && score < 3) {
       comment.style.display = "block";
     } else {
       comment.style.display = "none";
