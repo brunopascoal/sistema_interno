@@ -10,11 +10,6 @@ class Question(models.Model):
     def __str__(self):
         return self.text
 
-class EvaluationType(models.Model):
-    name = models.CharField(max_length=255)
-
-    def __str__(self):
-        return self.name
 
 class EvaluationSchedule(models.Model):
     evaluator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='evaluation_schedules')
@@ -23,7 +18,6 @@ class EvaluationSchedule(models.Model):
     department = models.ForeignKey(Department, on_delete=models.CASCADE, default=1)  # Defina o valor padrão aqui
     role = models.ForeignKey(Role, on_delete=models.CASCADE, default=1)  # Defina o valor padrão aqui
     date_scheduled = models.DateField()
-    evaluation_type = models.ForeignKey(EvaluationType, on_delete=models.CASCADE)
 
     def __str__(self):
         return f"Evaluation scheduled by {self.evaluator} for {self.evaluatee} on {self.date_scheduled}"
