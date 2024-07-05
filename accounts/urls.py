@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import login_view, logout_view, homepage_view, list_clients, delete_client, edit_client, add_client, list_users, add_user, edit_user, delete_user
+from .views import login_view, logout_view, homepage_view, list_clients, delete_client, edit_client, add_client, list_users, add_user, edit_user, delete_user, keep_session_alive
 
 urlpatterns = [
     path("", login_view, name="login"),
@@ -15,5 +15,7 @@ urlpatterns = [
     path('clients/add/', add_client, name='add_client'),
     path('clients/edit/<int:client_id>/', edit_client, name='edit_client'),
     path('clients/delete/<int:client_id>/', delete_client, name='delete_client'),
+    path('keep-session-alive/', keep_session_alive, name='keep_session_alive'),
+
 ]
 

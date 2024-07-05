@@ -4,6 +4,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from .forms import ClientForm, CustomUserCreationForm, CustomUserChangeForm
 from .models import Client, CustomUser
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 @login_required
 def list_users(request):
@@ -41,15 +43,6 @@ def delete_user(request, user_id):
         return redirect('list_users')
     return render(request, 'users/delete_user.html', {'user': user})
 
-# def register_view(request):
-#     user_form = UserCreationForm()
-#     if request.method == "POST":
-
-#         user_form = UserCreationForm(request.POST)
-#         if user_form.is_valid():
-#             user_form.save()
-#             return redirect("login")
-#     return render(request, "register.html", {"user_form": user_form})
 
 def login_view(request):
     if request.method == "POST":
@@ -111,3 +104,8 @@ def delete_client(request, client_id):
         client.delete()
         return redirect('list_clients')
     return render(request, 'clients/delete_client.html', {'client': client})
+
+
+@csrf_exempt
+def keep_session_alive(request):
+    return JsonResponse({'status': 'success'})

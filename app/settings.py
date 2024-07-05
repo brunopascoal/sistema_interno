@@ -51,7 +51,17 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'accounts.middleware.SessionExpiredMiddleware',  # Adicione seu middleware personalizado
+
 ]
+
+# Configurações de sessão
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_NAME = 'sessionid'
+SESSION_COOKIE_AGE = 400  # 5 minutos
+SESSION_COOKIE_SECURE = True  # Apenas via HTTPS
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_COOKIE_HTTPONLY = True  # Maior segurança
 
 ROOT_URLCONF = "app.urls"
 
@@ -110,7 +120,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "pt-br"
 
 TIME_ZONE = "America/Sao_Paulo"
 
@@ -139,3 +149,4 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # preciso usar isso pra usar imagens no projeto
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 MEDIA_URL = "/media/"
+
