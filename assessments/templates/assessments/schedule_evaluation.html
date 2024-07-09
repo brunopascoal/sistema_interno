@@ -6,13 +6,15 @@
     <div class="form-group">
       {% for field in form %}
       <div class="mb-3">
-        <label for="{{ field.id_for_label }}" class="form-label"
-          >{{ field.label }}</label
-        >
+        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
         {{ field }}
         <div class="invalid-feedback">{{ field.errors|striptags }}</div>
       </div>
       {% endfor %}
+      <div class="mb-3 form-check">
+        <input type="checkbox" class="form-check-input" id="self_evaluation" name="self_evaluation">
+        <label class="form-check-label" for="self_evaluation">Autoavaliação</label>
+      </div>
     </div>
     <button type="submit" class="btn btn-primary">Agendar Avaliação</button>
   </form>

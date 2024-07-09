@@ -3,6 +3,8 @@ from .models import EvaluationSchedule, Evaluation, Answer
 from accounts.models import CustomUser
 
 class EvaluationScheduleForm(forms.ModelForm):
+    self_evaluation = forms.BooleanField(required=False, label='Autoavaliação')
+
     class Meta:
         model = EvaluationSchedule
         fields = ['evaluator', 'evaluatee', 'client', 'date_scheduled']
@@ -25,6 +27,7 @@ class EvaluationScheduleForm(forms.ModelForm):
         self.fields['evaluatee'].queryset = CustomUser.objects.filter(department=user.department)
         for visible in self.visible_fields():
             visible.field.widget.attrs['class'] = 'form-select'
+
 class EvaluationForm(forms.ModelForm):
     class Meta:
         model = Evaluation

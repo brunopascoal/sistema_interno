@@ -1,12 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .forms import EvaluationScheduleForm, EvaluationForm
+from .forms import EvaluationScheduleForm
 from .models import EvaluationSchedule, Evaluation, Answer, Question
 from accounts.models import CustomUser
 from django.http import JsonResponse
 import pandas as pd
 from django.http import HttpResponse
-from django.utils.dateparse import parse_date
 import matplotlib.pyplot as plt
 from django import forms
 import altair as alt
@@ -20,10 +19,20 @@ def schedule_evaluation(request):
         form = EvaluationScheduleForm(request.POST, user=request.user)
         if form.is_valid():
             schedule = form.save(commit=False)
-            #schedule.evaluator = request.user  # Define o avaliador como o usuário logado
             schedule.department = request.user.department  # Define o departamento automaticamente
             schedule.role = request.user.role  # Define o cargo automaticamente
             schedule.save()
+            if 'self_evaluation' in request.POST and request.POST['self_evaluation'] == 'on':
+                auto_evaluation_schedule = EvaluationSchedule.objects.create(
+                    evaluator=schedule.evaluatee,  # Avaliador e avaliado são os mesmos
+                    evaluatee=schedule.evaluatee,
+                    client=schedule.client,
+                    department=schedule.department,
+                    role=schedule.role,
+                    date_scheduled=schedule.date_scheduled,
+                    self_evaluation=True
+                )
+                auto_evaluation_schedule.save()
             return redirect('view_scheduled_evaluations')
     else:
         form = EvaluationScheduleForm(user=request.user)
@@ -37,18 +46,43 @@ def create_evaluation(request):
         schedule_id = request.POST.get('schedule_id')
         if schedule_id:
             schedule = get_object_or_404(EvaluationSchedule, id=schedule_id)
-            evaluation = Evaluation.objects.create(schedule=schedule)
-            role_type = schedule.evaluatee.role.role_type
-            questions = Question.objects.filter(department=schedule.department, role_type=role_type)
-            for question in questions:
-                score = request.POST.get(f'question_{question.id}')
-                comment = request.POST.get(f'comment_{question.id}')
-                Answer.objects.create(evaluation=evaluation, question=question, score=score, comment=comment)
-            return redirect('view_evaluations')
+            if schedule.self_evaluation:
+                # Permite criar a autoavaliação
+                evaluation = Evaluation.objects.create(schedule=schedule)
+                role_type = schedule.evaluatee.role.role_type
+                questions = Question.objects.filter(department=schedule.department, role_type=role_type)
+                for question in questions:
+                    score = request.POST.get(f'question_{question.id}')
+                    comment = request.POST.get(f'comment_{question.id}')
+                    Answer.objects.create(evaluation=evaluation, question=question, score=score, comment=comment)
+                return redirect('view_evaluations')
+            else:
+                # Verifica se a autoavaliação foi concluída
+                self_eval_schedule = EvaluationSchedule.objects.filter(
+                    evaluatee=schedule.evaluatee, 
+                    self_evaluation=True
+                ).first()
+                if self_eval_schedule:
+                    self_eval = Evaluation.objects.filter(schedule=self_eval_schedule).exists()
+                    if not self_eval:
+                        return render(request, 'assessments/create_evaluation.html', {
+                            'pending_schedules': pending_schedules,
+                            'error': 'A autoavaliação deve ser concluída antes de realizar a avaliação regular.'
+                        })
+                # Criação da avaliação regular
+                evaluation = Evaluation.objects.create(schedule=schedule)
+                role_type = schedule.evaluatee.role.role_type
+                questions = Question.objects.filter(department=schedule.department, role_type=role_type)
+                for question in questions:
+                    score = request.POST.get(f'question_{question.id}')
+                    comment = request.POST.get(f'comment_{question.id}')
+                    Answer.objects.create(evaluation=evaluation, question=question, score=score, comment=comment)
+                return redirect('view_evaluations')
     
     return render(request, 'assessments/create_evaluation.html', {
         'pending_schedules': pending_schedules,
     })
+
 
 @login_required
 def view_evaluations(request):
