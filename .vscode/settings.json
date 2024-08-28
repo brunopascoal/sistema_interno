@@ -1,4 +1,5 @@
 {
+  "editor.fontSize": 19,
     "[django-html]": {
         "editor.formatOnSave": false,
         "editor.defaultFormatter": "vscode.html-language-features",

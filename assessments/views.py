@@ -163,6 +163,35 @@ def export_all_evaluations(request):
     return response
 
 
+@login_required
+def export_evaluation(request, evaluation_id):
+    evaluation = get_object_or_404(Evaluation, id=evaluation_id)
+    data = []
+
+    answers = Answer.objects.filter(evaluation=evaluation)
+    for answer in answers:
+        data.append({
+            'Avaliador': evaluation.schedule.evaluator.username,
+            'Avaliado': evaluation.schedule.evaluatee.username,
+            'Cliente': evaluation.schedule.client.name,
+            'Departamento': evaluation.schedule.department.name,
+            'Cargo': evaluation.schedule.role.name,
+            'Data Agendada': evaluation.schedule.date_scheduled,
+            'Data Concluída': evaluation.date_completed,
+            'Pergunta': answer.question.text,
+            'Nota': answer.score,
+            'Comentário': answer.comment,
+        })
+
+    df = pd.DataFrame(data)
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = f'attachment; filename="Avaliação de {evaluation.schedule.evaluatee.username}.xlsx"'
+    df.to_excel(response, index=False)
+
+    return response
+
+
+
 class AnalysisForm(forms.Form):
     user = forms.ModelChoiceField(queryset=CustomUser.objects.all(), label="Usuário", widget=forms.Select(attrs={'class': 'form-select'}))
     start_date = forms.DateField(label="Data Inicial", widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-select'}))
