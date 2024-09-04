@@ -25,6 +25,8 @@ class EvaluationSchedule(models.Model):
 class Evaluation(models.Model):
     schedule = models.OneToOneField(EvaluationSchedule, on_delete=models.CASCADE)
     date_completed = models.DateField(auto_now_add=True)
+    role_at_time = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True)  
+
 
     def __str__(self):
         return f"Evaluation by {self.schedule.evaluator} for {self.schedule.evaluatee} on {self.date_completed}"

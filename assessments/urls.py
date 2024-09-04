@@ -1,6 +1,5 @@
 from django.urls import path
 from .views import schedule_evaluation, create_evaluation, view_evaluations, view_scheduled_evaluations, evaluation_detail, get_questions, export_evaluation, export_all_evaluations, analysis
-
 urlpatterns = [
     path('schedule/', schedule_evaluation, name='schedule_evaluation'),
     path('create/', create_evaluation, name='create_evaluation'),
@@ -11,6 +10,7 @@ urlpatterns = [
     path('export/evaluation/<int:evaluation_id>/', export_evaluation, name='export_evaluation'),
     path('export/all/', export_all_evaluations, name='export_all_evaluations'),
     path('analysis/', analysis, name='analysis'),
+
 
 
 ]

@@ -5,11 +5,15 @@ from .models import EvaluationSchedule, Evaluation, Answer, Question
 from accounts.models import CustomUser
 from django.http import JsonResponse
 import pandas as pd
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 import matplotlib.pyplot as plt
 from django import forms
 import altair as alt
 from django.utils.safestring import mark_safe
+from django.db import models  # Adicione esta linha no início da views.py
+import json
+from django.db.models import Avg
+
 
 
 
@@ -48,7 +52,7 @@ def create_evaluation(request):
             schedule = get_object_or_404(EvaluationSchedule, id=schedule_id)
             if schedule.self_evaluation:
                 # Permite criar a autoavaliação
-                evaluation = Evaluation.objects.create(schedule=schedule)
+                evaluation = Evaluation.objects.create(schedule=schedule, role_at_time=schedule.evaluatee.role)
                 role_type = schedule.evaluatee.role.role_type
                 questions = Question.objects.filter(department=schedule.department, role_type=role_type)
                 for question in questions:
@@ -70,7 +74,7 @@ def create_evaluation(request):
                             'error': 'A autoavaliação deve ser concluída antes de realizar a avaliação regular.'
                         })
                 # Criação da avaliação regular
-                evaluation = Evaluation.objects.create(schedule=schedule)
+                evaluation = Evaluation.objects.create(schedule=schedule, role_at_time=schedule.evaluatee.role)
                 role_type = schedule.evaluatee.role.role_type
                 questions = Question.objects.filter(department=schedule.department, role_type=role_type)
                 for question in questions:
@@ -208,38 +212,52 @@ def analysis(request):
             start_date = form.cleaned_data['start_date']
             end_date = form.cleaned_data['end_date']
 
-            evaluations = Evaluation.objects.filter(
+            # Filtra as avaliações normais e autoavaliações
+            normal_evaluations = Evaluation.objects.filter(
                 schedule__evaluatee=user,
-                date_completed__range=[start_date, end_date]
+                date_completed__range=[start_date, end_date],
+                schedule__self_evaluation=False
+            )
+            self_evaluations = Evaluation.objects.filter(
+                schedule__evaluatee=user,
+                date_completed__range=[start_date, end_date],
+                schedule__self_evaluation=True
             )
 
-            if evaluations.exists():
-                questions = Question.objects.filter(department=user.department, role_type=user.role.role_type)
-                data = {question.text: [] for question in questions}
+            questions = Question.objects.filter(department=user.department, role_type=user.role.role_type)
+            
+            data = []
+            
+            for question in questions:
+                normal_scores = Answer.objects.filter(evaluation__in=normal_evaluations, question=question).values_list('score', flat=True)
+                self_scores = Answer.objects.filter(evaluation__in=self_evaluations, question=question).values_list('score', flat=True)
 
-                for evaluation in evaluations:
-                    answers = Answer.objects.filter(evaluation=evaluation)
-                    for answer in answers:
-                        data[answer.question.text].append(answer.score)
+                if normal_scores:
+                    avg_normal = sum(normal_scores) / len(normal_scores)
+                    data.append({'Pergunta': question.text, 'Tipo': 'Avaliação', 'Média': avg_normal})
 
-                avg_scores = {question: sum(scores) / len(scores) for question, scores in data.items() if scores}
+                if self_scores:
+                    avg_self = sum(self_scores) / len(self_scores)
+                    data.append({'Pergunta': question.text, 'Tipo': 'Autoavaliação', 'Média': avg_self})
 
-                # Preparar os dados para Altair
-                df = pd.DataFrame(list(avg_scores.items()), columns=['Pergunta', 'Média'])
+            df = pd.DataFrame(data)
+            
+            chart = alt.Chart(df).mark_bar().encode(
+                x=alt.X('Pergunta:N', title=None, axis=alt.Axis(labelAngle=-45)),
+                y=alt.Y('Média:Q', title=None),
+                color='Tipo:N',
+                xOffset='Tipo:N',  # Isso permite o deslocamento das barras para o mesmo eixo x
+                tooltip=['Pergunta:N', 'Tipo:N', 'Média:Q']
+            ).properties(
+                width=600,
+                height=400,
+                title=f'Média das Notas por Pergunta para {user.username}'
+            ).interactive()
 
-                # Criar o gráfico com Altair
-                chart = alt.Chart(df).mark_bar().encode(
-                    x=alt.X('Pergunta', sort=None),
-                    y='Média',
-                    tooltip=['Pergunta', 'Média']
-                ).properties(
-                    width=600,
-                    height=400,
-                    title=f'Média das Notas por Pergunta para {user.username}'
-                ).interactive()
 
-                chart_json = chart.to_json()
 
-                return render(request, 'assessments/analysis.html', {'form': form, 'chart': mark_safe(chart_json)})
+            chart_json = chart.to_json()
+
+            return render(request, 'assessments/analysis.html', {'form': form, 'chart': mark_safe(chart_json)})
 
     return render(request, 'assessments/analysis.html', {'form': form})
