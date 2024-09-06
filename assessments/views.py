@@ -1,17 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .forms import EvaluationScheduleForm
+from .forms import EvaluationScheduleForm, AnalysisForm
 from .models import EvaluationSchedule, Evaluation, Answer, Question
 from accounts.models import CustomUser
 from django.http import JsonResponse
 import pandas as pd
 from django.http import HttpResponse, JsonResponse
-import matplotlib.pyplot as plt
 from django import forms
 import altair as alt
 from django.utils.safestring import mark_safe
-from django.db import models  # Adicione esta linha no início da views.py
-import json
 from django.db.models import Avg
 
 
@@ -173,19 +170,32 @@ def export_evaluation(request, evaluation_id):
 
 
 
-class AnalysisForm(forms.Form):
-    user = forms.ModelChoiceField(queryset=CustomUser.objects.all(), label="Usuário", widget=forms.Select(attrs={'class': 'form-select'}))
-    start_date = forms.DateField(label="Data Inicial", widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-select'}))
-    end_date = forms.DateField(label="Data Final", widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-select'}))
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .forms import AnalysisForm
 
 @login_required
 def analysis(request):
-    form = AnalysisForm()
+    # Verificamos se o usuário pertence ao grupo 'Gestão'
+    is_gestao = request.user.groups.filter(name='Gestão').exists()
 
     if request.method == 'POST':
+        # Inicializamos o formulário com os dados submetidos
         form = AnalysisForm(request.POST)
+
+        # Caso o usuário não seja do grupo 'Gestão', removemos o campo 'user'
+        if not is_gestao:
+            form.fields.pop('user')
+        
+        # Verificamos se o formulário é válido
         if form.is_valid():
-            user = form.cleaned_data['user']
+            # Se o usuário não for de gestão, inserimos o usuário logado nos dados validados
+            if not is_gestao:
+                form.cleaned_data['user'] = request.user
+
+            # Pegamos os dados do formulário
+            user = form.cleaned_data.get('user', request.user)  # Para não gestores, `user` é o logado
             start_date = form.cleaned_data['start_date']
             end_date = form.cleaned_data['end_date']
 
@@ -201,10 +211,11 @@ def analysis(request):
                 schedule__self_evaluation=True
             )
 
+            # Filtra as perguntas relacionadas ao departamento e papel do usuário
             questions = Question.objects.filter(department=user.department, role_type=user.role.role_type)
-            
+
+            # Coleta os dados das respostas para as perguntas
             data = []
-            
             for question in questions:
                 normal_scores = Answer.objects.filter(evaluation__in=normal_evaluations, question=question).values_list('score', flat=True)
                 self_scores = Answer.objects.filter(evaluation__in=self_evaluations, question=question).values_list('score', flat=True)
@@ -217,24 +228,32 @@ def analysis(request):
                     avg_self = sum(self_scores) / len(self_scores)
                     data.append({'Pergunta': question.text, 'Tipo': 'Autoavaliação', 'Média': avg_self})
 
+            # Criação do DataFrame e do gráfico com Altair
             df = pd.DataFrame(data)
-            
-            chart = alt.Chart(df).mark_bar().encode(
-                x=alt.X('Pergunta:N', title=None, axis=alt.Axis(labelAngle=-45)),
-                y=alt.Y('Média:Q', title=None),
-                color='Tipo:N',
-                xOffset='Tipo:N',  # Isso permite o deslocamento das barras para o mesmo eixo x
-                tooltip=['Pergunta:N', 'Tipo:N', 'Média:Q']
-            ).properties(
-                width=600,
-                height=400,
-                title=f'Média das Notas por Pergunta para {user.username}'
-            ).interactive()
 
+            if not df.empty:  # Verifica se há dados para gerar o gráfico
+                chart = alt.Chart(df).mark_bar().encode(
+                    x=alt.X('Pergunta:N', title=None, axis=alt.Axis(labelAngle=-45)),
+                    y=alt.Y('Média:Q', title=None),
+                    color='Tipo:N',
+                    xOffset='Tipo:N',  # Isso permite o deslocamento das barras para o mesmo eixo x
+                    tooltip=['Pergunta:N', 'Tipo:N', 'Média:Q']
+                ).properties(
+                    width=600,
+                    height=400,
+                    title=f'Média das Notas por Pergunta para {user.username}'
+                ).interactive()
 
-
-            chart_json = chart.to_json()
+                chart_json = chart.to_json()
+            else:
+                chart_json = None  # Nenhum dado, nenhum gráfico a ser gerado
 
             return render(request, 'assessments/analysis.html', {'form': form, 'chart': mark_safe(chart_json)})
+    
+    else:
+        # Inicializamos o formulário vazio no caso de GET
+        form = AnalysisForm()
+        if not is_gestao:
+            form.fields.pop('user')
 
     return render(request, 'assessments/analysis.html', {'form': form})

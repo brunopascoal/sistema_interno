@@ -37,3 +37,8 @@ class AnswerForm(forms.ModelForm):
     class Meta:
         model = Answer
         fields = ['question', 'score']
+
+class AnalysisForm(forms.Form):
+    user = forms.ModelChoiceField(queryset=CustomUser.objects.all(), label="Usuário", widget=forms.Select(attrs={'class': 'form-select'}))
+    start_date = forms.DateField(label="Data Inicial", widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-select'}))
+    end_date = forms.DateField(label="Data Final", widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-select'}))

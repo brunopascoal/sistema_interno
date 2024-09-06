@@ -1,68 +1,89 @@
-{% extends "base.html" %} {% load static %} {% block content %}
+{% extends "base.html" %} 
+{% load static %} 
+{% block content %}
 <div class="container mt-5">
   <h2 class="mb-4">Avaliações Realizadas</h2>
-  <div class="table-responsive">
 
-    <div class="search-container">
-<input class="search-fruits" type="text">
-  </div>
-    <a href="{% url 'export_all_evaluations' %}" class="download-button">Exportar Todas as Avaliações</a>
+  <a href="{% url 'export_all_evaluations' %}" class="download-button">Exportar Todas as Avaliações</a>
 
-    <table class="table table-striped table-hover">
-      <thead class="thead-dark">
-        <tr>
-          <th>Avaliador</th>
-          <th>Avaliado</th>
-          <th>Cliente</th>
-          <th>Data</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for evaluation in evaluations %}
-        <tr>
-          <td>
-            {{ evaluation.schedule.evaluator.first_name }}
-            {{evaluation.schedule.evaluator.last_name }}
-          </td>
-          <td>
-            {{evaluation.schedule.evaluatee.first_name }}
-            {{evaluation.schedule.evaluatee.last_name }}
-          </td>
-          <td>{{ evaluation.schedule.client.name }}</td>
-          <td>{{ evaluation.date_completed|date:"d/m/Y" }}</td>
-          <td>
-            <a
-              href="{% url 'evaluation_detail' evaluation.id %}"
-              class="detail-button"
-              >Detalhes</a
-            >
-            <a
-            href="{% url 'export_evaluation' evaluation.id %}"
-            class="download-button"
-            >Baixar</a
-          >
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+  <!-- Campo de pesquisa -->
+  <input id="searchInput" class="form-control mb-3" type="text" placeholder="Pesquisar...">
+
+  <table class="table table-striped table-hover" id="evaluationTable">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col" onclick="sortTable(0)">Avaliador</th>
+        <th scope="col" onclick="sortTable(1)">Avaliado</th>
+        <th scope="col" onclick="sortTable(2)">Cliente</th>
+        <th scope="col" onclick="sortTable(3)">Data</th>
+        <th scope="col">Ações</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody">
+      {% for evaluation in evaluations %}
+      <tr>
+        <td>{{ evaluation.schedule.evaluator.first_name }} {{evaluation.schedule.evaluator.last_name }}</td>
+        <td>{{evaluation.schedule.evaluatee.first_name }} {{evaluation.schedule.evaluatee.last_name }}</td>
+        <td>{{ evaluation.schedule.client.name }}</td>
+        <td>{{ evaluation.date_completed|date:"d/m/Y" }}</td>
+        <td>
+          <a href="{% url 'evaluation_detail' evaluation.id %}" class="detail-button">Detalhes</a>
+          <a href="{% url 'export_evaluation' evaluation.id %}" class="download-button">Baixar</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
 {% endblock %}
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <script>
-let inputElement = document.querySelector("input")
-let listElement = document.querySelector("tr")
-let itemElement = listElement.querySelectorAll("td")
-inputElement.addEventListener("input", (e) => {
-  let inputed = e.target.value.toLowerCase()
-  itemElement.forEach((li) => {
-    let text = li.textContent.toLowerCase()
-    if(text.includes(inputed)){
-      li.style.display = "block"
-    }else{
-      li.style.display = "none"
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> 
+<script>
+  // Função para filtrar a tabela
+  $(document).ready(function(){
+    $("#searchInput").on("keyup", function() {
+      var value = $(this).val().toLowerCase();
+      $("#tableBody tr").filter(function() {
+        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+      });
+    });
+  });
+
+  // Função para ordenar a tabela
+  function sortTable(n) {
+    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+    table = document.getElementById("evaluationTable");
+    switching = true;
+    dir = "asc"; 
+    while (switching) {
+      switching = false;
+      rows = table.rows;
+      for (i = 1; i < (rows.length - 1); i++) {
+        shouldSwitch = false;
+        x = rows[i].getElementsByTagName("TD")[n];
+        y = rows[i + 1].getElementsByTagName("TD")[n];
+        if (dir == "asc") {
+          if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+            shouldSwitch = true;
+            break;
+          }
+        } else if (dir == "desc") {
+          if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+            shouldSwitch = true;
+            break;
+          }
+        }
+      }
+      if (shouldSwitch) {
+        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+        switching = true;
+        switchcount ++; 
+      } else {
+        if (switchcount == 0 && dir == "asc") {
+          dir = "desc";
+          switching = true;
+        }
+      }
     }
-  })
-})
+  }
 </script>
