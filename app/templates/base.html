@@ -1,142 +1,107 @@
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Sistema Interno{% endblock %}</title>
-    <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet" />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ"
-      crossorigin="anonymous"
-    />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
     <link rel="stylesheet" href="{% static 'app/css/style.css' %}" />
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-      // Função para manter a sessão ativa
-      function keepSessionAlive() {
-        $.ajax({
-          url: "{% url 'keep_session_alive' %}",
-          method: 'GET',
-          success: function(data) {
-            console.log('Sessão mantida ativa');
-          }
-        });
-      }
-
-      // Chama a função keepSessionAlive a cada 5 minutos (300000 milissegundos)
-      setInterval(keepSessionAlive, 300000);  // 5 minutos
-    </script>
-  </head>
-  <body>
+</head>
+<body class="light-theme">
     <div class="wrapper">
-      <aside id="sidebar">
-        <div class="d-flex">
-          <button class="toggle-btn" type="button">
-            <i class="lni lni-grid-alt"></i>
-          </button>
-          <div class="sidebar-logo">
-            <a href="#">Olá, {{ user.first_name }}</a>
-          </div>
-        </div>
-        <ul class="sidebar-nav">
-          <li class="sidebar-item">
-            <a
-              href="#"
-              class="sidebar-link collapsed has-dropdown"
-              data-bs-toggle="collapse"
-              data-bs-target="#auth"
-              aria-expanded="false"
-              aria-controls="auth"
-            >
-              <i class="lni lni-agenda"></i>
-              <span>Avaliações</span>
-            </a>
-            <ul
-              id="auth"
-              class="sidebar-dropdown list-unstyled collapse"
-              data-bs-parent="#sidebar"
-            >
-              <li class="sidebar-item">
-                <a href="{% url 'create_evaluation' %}" class="sidebar-link"
-                  >Realizar Avaliação</a
-                >
-              </li>
+        <!-- Sidebar -->
+        <nav id="sidebar" class="active">
+            <div class="sidebar-header">
+                {% comment %} <img
+              src="{% static 'accounts/images/logo.png' %}"
+              alt="Logo"
+              class="img-fluid logo-small mb-4"
+            /> {% endcomment %}
 
-              <li class="sidebar-item">
-                <a href="{% url 'analysis' %}" class="sidebar-link"
-                  >Análise de Avaliações</a
-                >
-              </li>
-              <li class="sidebar-item">
-                <a href="{% url 'view_evaluations' %}" class="sidebar-link"
-                  >Consultar Avaliações</a
-                >
-              </li>
-              <li class="sidebar-item">
-                <a href="{% url 'schedule_evaluation' %}" class="sidebar-link"
-                  >Agendar Avaliação</a
-                >
-              </li>
-              <li class="sidebar-item">
-                <a
-                  href="{% url 'view_scheduled_evaluations' %}"
-                  class="sidebar-link"
-                  >Avaliações Agendadas</a
-                >
-              </li>
+            <h2>Moore</h2>
+            </div>
+            <ul class="list-unstyled components">
+                <li class="active">
+                    <a href="#homeSubmenu1" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Avaliações</a>
+                    <ul class="collapse list-unstyled" id="homeSubmenu1">
+                        <li><a href="{% url 'create_evaluation' %}">Realizar Avaliação</a></li>
+                        <li><a href="{% url 'view_evaluations' %}">Consultar Avaliações</a></li>
+                        <li><a href="{% url 'view_scheduled_evaluations' %}">Avaliações Agendadas</a></li>
+                        <li><a href="{% url 'schedule_evaluation' %}">Agendar Avaliação</a></li>
+                        <li><a href="{% url 'analysis' %}">Análise de Avaliações</a></li>
+
+
+                    </ul>
+                </li>
+
+                <li class="active">
+                    <a href="#homeSubmenu2" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Gestão</a>
+                    <ul class="collapse list-unstyled" id="homeSubmenu2">
+                        <li><a href="{% url 'list_clients' %}">Clientes</a></li>
+                        <li><a href="{% url 'list_users' %}">Usuários</a></li>
+                    </ul>
+                </li>
+
+                
+                <li><a href="#">About</a></li>
+                <li><a href="#">Portfolio</a></li>
+                <li><a id="themeToggle" href="#">Theme</a></li>
             </ul>
-          </li>
-
-          <li class="sidebar-item">
-            <a
-              href="#"
-              class="sidebar-link collapsed has-dropdown"
-              data-bs-toggle="collapse"
-              data-bs-target="#client"
-              aria-expanded="false"
-              aria-controls="client"
-            >
-              <i class="lni lni-briefcase-alt"></i>
-              <span>Gestão</span>
-            </a>
-            <ul
-              id="client"
-              class="sidebar-dropdown list-unstyled collapse"
-              data-bs-parent="#sidebar"
-            >
-              <li class="sidebar-item">
-                <a href="{% url 'list_users' %}" class="sidebar-link"
-                  >Usuários</a
-                >
-              </li>
-
-              <li class="sidebar-item">
-                <a href="{% url 'list_clients' %}" class="sidebar-link"
-                  >Clientes</a
-                >
-              </li>
-            </ul>
-          </li>
-          <!-- Outros itens do sidebar -->
-        </ul>
-        <div class="sidebar-footer">
-          <a href="{% url 'logout' %}" class="sidebar-link">
-            <i class="lni lni-exit"></i>
-            <span>Sair</span>
-          </a>
+        </nav>
+        <!-- Page Content -->
+        <div id="content">
+            <nav class="navbar navbar-expand-lg">
+                <div class="container-fluid">
+                    <button type="button" id="sidebarCollapse">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="navbar-nav ms-auto">
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Services</a>
+                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <li><a class="dropdown-item" href="#">Service 1</a></li>
+                                    <li><a class="dropdown-item" href="#">Service 2</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="#">Something else here</a></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item"><a class="nav-link" href="#">About</a></li>
+                            <li class="nav-item"><a class="nav-link" href="#">{{ user.first_name }}</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+            <div class="container">
+                            {% block content %}
+                <!-- Este bloco será substituído pelo conteúdo das outras páginas -->
+                {% endblock %}
+            </div> 
         </div>
-      </aside>
-      <div class="main p-3">{% block content %} {% endblock %}</div>
     </div>
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
-      crossorigin="anonymous"
-    ></script>
-    <script src="{% static 'app/js/main.js' %}"></script>
-  </body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const sidebarCollapse = document.getElementById('sidebarCollapse');
+            const themeToggle = document.getElementById('themeToggle');
+            const body = document.body;
+
+            sidebarCollapse.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+            });
+
+            themeToggle.addEventListener('click', function() {
+                body.classList.toggle('dark-theme');
+                body.classList.toggle('light-theme');
+            });
+        });
+    </script>
+</body>
 </html>
