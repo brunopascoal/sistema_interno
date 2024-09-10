@@ -7,6 +7,21 @@ from .models import Client, CustomUser
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
+# views.py
+def register_view(request):
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.is_approved = False  # O usuário não será aprovado automaticamente
+            user.save()
+            return redirect('login')  # Redireciona para a página de login após o registro
+    else:
+        form = CustomUserCreationForm()
+    
+    return render(request, 'register.html', {'form': form})
+
+
 @login_required
 def list_users(request):
     users = CustomUser.objects.all()
@@ -50,16 +65,17 @@ def login_view(request):
         password = request.POST["password"]
         user = authenticate(request, username=username, password=password)
         if user is not None:
-            login(request, user)
-            return redirect('homepage')
+            if user.is_approved:  # Verifica se o usuário está ativo
+                login(request, user)
+                return redirect('homepage')
+            else:
+                error_message = "Sua conta está desativada. Entre em contato com o administrador."
         else:
-            login_form = AuthenticationForm(request, data=request.POST)
             error_message = "Usuário ou senha incorretos."
     else:
-        login_form = AuthenticationForm()
         error_message = None
 
-    return render(request, "login.html", {'login_form': login_form, 'error_message': error_message})
+    return render(request, "login.html", {'error_message': error_message})
 
 def logout_view(request):
     logout(request)

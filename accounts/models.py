@@ -23,6 +23,8 @@ class Role(models.Model):
 class CustomUser(AbstractUser):
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True)
     role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True, blank=True)
+    is_approved = models.BooleanField(default=False)  # Novo campo para aprovação
+
 
 class Client(models.Model):
     name = models.CharField(max_length=255)
