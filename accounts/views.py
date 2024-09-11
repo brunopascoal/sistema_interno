@@ -81,10 +81,6 @@ def logout_view(request):
     logout(request)
     return redirect('login')
 
-@login_required(login_url='login')
-def homepage_view(request):
-    return render(request, "homepage.html")
-
 @login_required
 def add_client(request):
     if request.method == 'POST':

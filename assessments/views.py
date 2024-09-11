@@ -187,7 +187,7 @@ def analysis(request):
         # Caso o usuário não seja do grupo 'Gestão', removemos o campo 'user'
         if not is_gestao:
             form.fields.pop('user')
-        
+
         # Verificamos se o formulário é válido
         if form.is_valid():
             # Se o usuário não for de gestão, inserimos o usuário logado nos dados validados
@@ -222,11 +222,23 @@ def analysis(request):
 
                 if normal_scores:
                     avg_normal = sum(normal_scores) / len(normal_scores)
-                    data.append({'Pergunta': question.text, 'Tipo': 'Avaliação', 'Média': avg_normal})
+                    weighted_normal = avg_normal * question.weight_question  # Multiplica a média pelo peso
+                    data.append({
+                        'Pergunta': question.text, 
+                        'Tipo': 'Avaliação', 
+                        'Média': weighted_normal,  # Média ponderada
+                        'Peso': question.weight_question  # Mantém o peso para o tooltip
+                    })
 
                 if self_scores:
                     avg_self = sum(self_scores) / len(self_scores)
-                    data.append({'Pergunta': question.text, 'Tipo': 'Autoavaliação', 'Média': avg_self})
+                    weighted_self = avg_self * question.weight_question  # Multiplica a média pelo peso
+                    data.append({
+                        'Pergunta': question.text, 
+                        'Tipo': 'Autoavaliação', 
+                        'Média': weighted_self,  # Média ponderada
+                        'Peso': question.weight_question  # Mantém o peso para o tooltip
+                    })
 
             # Criação do DataFrame e do gráfico com Altair
             df = pd.DataFrame(data)
@@ -237,11 +249,11 @@ def analysis(request):
                     y=alt.Y('Média:Q', title=None),
                     color='Tipo:N',
                     xOffset='Tipo:N',  # Isso permite o deslocamento das barras para o mesmo eixo x
-                    tooltip=['Pergunta:N', 'Tipo:N', 'Média:Q']
+                    tooltip=['Pergunta:N', 'Tipo:N', 'Média:Q', 'Peso:Q']  # Exibe o peso da pergunta no tooltip
                 ).properties(
                     width=600,
                     height=400,
-                    title=f'Média das Notas por Pergunta para {user.username}'
+                    title=f'Média das Notas por Pergunta (Ponderada pelo Peso) para {user.username}'
                 ).interactive()
 
                 chart_json = chart.to_json()
@@ -249,7 +261,7 @@ def analysis(request):
                 chart_json = None  # Nenhum dado, nenhum gráfico a ser gerado
 
             return render(request, 'assessments/analysis.html', {'form': form, 'chart': mark_safe(chart_json)})
-    
+
     else:
         # Inicializamos o formulário vazio no caso de GET
         form = AnalysisForm()

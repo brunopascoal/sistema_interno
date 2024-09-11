@@ -6,6 +6,7 @@ class Question(models.Model):
     text = models.CharField(max_length=255)
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
     role_type = models.IntegerField(choices=Role.ROLE_TYPE_CHOICES)
+    weight_question = models.IntegerField(choices=[(i, i) for i in range(1, 6)])
 
     def __str__(self):
         return self.text
