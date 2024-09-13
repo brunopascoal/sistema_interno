@@ -3,7 +3,6 @@ from .models import EvaluationSchedule, Evaluation, Answer
 from accounts.models import CustomUser
 
 class EvaluationScheduleForm(forms.ModelForm):
-    self_evaluation = forms.BooleanField(required=False, label='Autoavaliação')
 
     class Meta:
         model = EvaluationSchedule

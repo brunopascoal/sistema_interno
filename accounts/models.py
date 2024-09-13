@@ -24,6 +24,8 @@ class CustomUser(AbstractUser):
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True)
     role = models.ForeignKey(Role, on_delete=models.SET_NULL, null=True, blank=True)
     is_approved = models.BooleanField(default=False)  # Novo campo para aprovação
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"
 
 
 class Client(models.Model):

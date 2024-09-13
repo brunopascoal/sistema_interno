@@ -3,6 +3,7 @@ body {
     transition: all 0.3s ease;
 }
 
+
 .light-theme {
     --bg-color: #f8f9fa;
     --text-color: #333;
@@ -28,30 +29,45 @@ body {
     align-items: stretch;
 }
 
+/* Sidebar styling */
 #sidebar {
     min-width: 250px;
     max-width: 250px;
     background: var(--sidebar-bg);
     color: var(--text-color);
     transition: all 0.3s;
-}
-
-#sidebar.active {
-    margin-left: -250px;
+    font-family: 'Arial', sans-serif;
 }
 
 #sidebar .sidebar-header {
-    padding: 20px;
+    padding: 15px;
     background: var(--sidebar-bg);
+    text-align: center; /* Centraliza o texto na sidebar */
+    font-size: 1.5em;
+    font-weight: bold;
+    border-bottom: 2px solid #dee2e6; /* Adiciona uma linha abaixo do cabeçalho */
+    margin: 0 auto; /* Centraliza a imagem e remove qualquer margem extra */
+
+}
+
+.logo-small {
+    max-width: 80px; /* Ajuste conforme necessário */
+    height: auto;
 }
 
 #sidebar ul.components {
     padding: 20px 0;
+    margin-bottom: 30px;
 }
 
-#sidebar ul p {
-    color: var(--text-color);
-    padding: 15px;
+#sidebar ul li {
+    padding: 10px; /* Define espaçamento ao redor dos itens */
+    font-size: 1.1em;
+    border-bottom: 1px solid #dee2e6; /* Adiciona uma linha entre os itens */
+}
+
+#sidebar ul li:last-child {
+    border-bottom: none; /* Remove a linha do último item */
 }
 
 #sidebar ul li a {
@@ -60,11 +76,68 @@ body {
     display: block;
     color: var(--text-color);
     text-decoration: none;
+    text-align: left; /* Alinhamento do texto */
 }
 
 #sidebar ul li a:hover {
     background: #007bff;
     color: #fff;
+    border-radius: 5px; /* Adiciona bordas arredondadas no hover */
+    transition: all 0.3s ease; /* Suaviza a transição do hover */
+}
+
+
+/* Estilos para o botão de colapso da sidebar no tema claro */
+#sidebarCollapse {
+    background-color: var(--bg-color); /* Cor de fundo de acordo com o tema */
+    color: var(--text-color); /* Cor do ícone no tema claro */
+    border: none; /* Remove borda */
+    padding: 10px; /* Adiciona um espaçamento ao redor do botão */
+    border-radius: 5px; /* Bordas arredondadas */
+    transition: all 0.3s ease;
+}
+
+#sidebarCollapse:hover {
+    background-color: #007bff; /* Cor ao passar o mouse */
+    color: #fff; /* Cor do ícone ao passar o mouse */
+}
+
+/* Estilos para o botão no tema escuro */
+.dark-theme #sidebarCollapse {
+    background-color: #444; /* Cor de fundo para o tema escuro */
+    color: #f8f9fa; /* Cor do ícone no tema escuro */
+}
+
+.dark-theme #sidebarCollapse:hover {
+    background-color: #007bff; /* Cor de hover no tema escuro */
+    color: #fff; /* Cor do ícone ao passar o mouse */
+}
+
+
+/* Para as opções do dropdown dentro do sidebar */
+#sidebar ul ul {
+    padding-left: 30px; /* Recuo para os itens do dropdown */
+}
+
+#sidebar ul ul li {
+    padding: 10px;
+    font-size: 0.9em;
+    border-bottom: none; /* Remove a borda dos itens de dropdown */
+}
+
+#sidebar ul ul li a {
+    padding-left: 15px;
+    font-size: 1em;
+    color: var(--text-color);
+}
+
+#sidebar ul ul li a:hover {
+    background: none;
+    color: #007bff;
+}
+
+#sidebar.active {
+    margin-left: -250px;
 }
 
 #content {
@@ -108,8 +181,7 @@ body {
 
 /* Accessibility Enhancements */
 a:focus, button:focus {
-    outline: 2px solid #007bff;
-    outline-offset: 2px;
+    outline: none;
 }
 
 .sr-only {
@@ -148,3 +220,67 @@ a:focus, button:focus {
     background-color: var(--card-bg); /* Ajusta o hover conforme o tema */
     color: var(--text-color);
 }
+
+
+/* Estilos gerais para a tabela */
+table {
+    width: 100%; /* Define que a tabela ocupe 100% do espaço disponível */
+    border-collapse: collapse; /* Remove espaçamentos entre células */
+    margin: 20px 0; /* Define espaçamento entre a tabela e outros elementos */
+    font-size: 16px; /* Define o tamanho da fonte */
+    font-family: 'Arial', sans-serif; /* Define a fonte */
+    background-color: #f8f9fa; /* Cor de fundo da tabela */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Sombra para destacar a tabela */
+  }
+  
+  /* Estilo para cabeçalhos */
+  th {
+    background-color: #007bff; /* Cor de fundo do cabeçalho */
+    color: white; /* Cor do texto no cabeçalho */
+    text-align: left; /* Alinhamento do texto no cabeçalho */
+    padding: 12px 15px; /* Espaçamento interno */
+    border-bottom: 2px solid #dee2e6; /* Borda inferior para os cabeçalhos */
+  }
+  
+  /* Estilo para células de dados */
+  td {
+    padding: 12px 15px; /* Espaçamento interno */
+    border-bottom: 1px solid #dee2e6; /* Borda inferior para as células */
+    color: #333; /* Cor do texto nas células */
+  }
+  
+  /* Alternar cores nas linhas para melhor visualização */
+  tr:nth-child(even) {
+    background-color: #f2f2f2; /* Cor para linhas pares */
+  }
+  
+  /* Efeito de hover nas linhas */
+  tr:hover {
+    background-color: #e9ecef; /* Cor de fundo ao passar o mouse */
+    transition: background-color 0.3s ease; /* Suavização da transição */
+  }
+  
+  /* Ajuste para o conteúdo da tabela responsiva */
+  @media (max-width: 768px) {
+    table, thead, tbody, th, td, tr {
+      display: block;
+    }
+    tr {
+      margin-bottom: 15px;
+    }
+    td {
+      text-align: right;
+      padding-left: 50%;
+      position: relative;
+    }
+    td::before {
+      content: attr(data-label); /* Adiciona o título da coluna antes do valor */
+      position: absolute;
+      left: 0;
+      width: 50%;
+      padding-left: 15px;
+      font-weight: bold;
+      text-align: left;
+    }
+  }
+  

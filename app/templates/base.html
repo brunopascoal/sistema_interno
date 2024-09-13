@@ -15,13 +15,12 @@
         <!-- Sidebar -->
         <nav id="sidebar" class="active">
             <div class="sidebar-header">
-                {% comment %} <img
-              src="{% static 'accounts/images/logo.png' %}"
-              alt="Logo"
-              class="img-fluid logo-small mb-4"
-            /> {% endcomment %}
-
-            <h2>Moore</h2>
+                <img
+                  src="{% static 'accounts/images/logo.png' %}"
+                  alt="Logo"
+                  class="img-fluid mb-4"
+                  style="max-width: 200px; height: 80px;"
+                />
             </div>
             <ul class="list-unstyled components">
                 <li class="active">
@@ -30,25 +29,28 @@
                         <li><a href="{% url 'create_evaluation' %}">Realizar Avaliação</a></li>
                         <li><a href="{% url 'view_evaluations' %}">Consultar Avaliações</a></li>
                         <li><a href="{% url 'view_scheduled_evaluations' %}">Avaliações Agendadas</a></li>
-                        <li><a href="{% url 'schedule_evaluation' %}">Agendar Avaliação</a></li>
+                        {% if is_in_schedule_group %}
+                            <li><a href="{% url 'schedule_evaluation' %}">Agendar Avaliação</a></li>
+                        {% endif %}
                         <li><a href="{% url 'analysis' %}">Análise de Avaliações</a></li>
 
 
                     </ul>
                 </li>
-
-                <li class="active">
-                    <a href="#homeSubmenu2" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Gestão</a>
-                    <ul class="collapse list-unstyled" id="homeSubmenu2">
-                        <li><a href="{% url 'list_clients' %}">Clientes</a></li>
-                        <li><a href="{% url 'list_users' %}">Usuários</a></li>
-                    </ul>
-                </li>
+                {% if is_in_control_group %}
+    <li class="active">
+        <a href="#homeSubmenu2" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Gestão</a>
+        <ul class="collapse list-unstyled" id="homeSubmenu2">
+            <li><a href="{% url 'list_clients' %}">Clientes</a></li>
+            <li><a href="{% url 'list_users' %}">Usuários</a></li>
+        </ul>
+    </li>
+{% endif %}
 
                 
-                <li><a href="#">About</a></li>
-                <li><a href="#">Portfolio</a></li>
                 <li><a id="themeToggle" href="#">Theme</a></li>
+                <li><a id="themeToggle" href="{% url 'logout' %}">Sair</a></li>
+
             </ul>
         </nav>
         <!-- Page Content -->
@@ -57,13 +59,13 @@
                 <div class="container-fluid">
                     <button type="button" id="sidebarCollapse">
                         <i class="bi bi-list"></i>
-                    </button>
+                    </button>                    
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>
                     </button>
                     <div class="collapse navbar-collapse" id="navbarSupportedContent">
                         <ul class="navbar-nav ms-auto">
-                            <li class="nav-item dropdown">
+                            {% comment %} <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Services</a>
                                 <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                                     <li><a class="dropdown-item" href="#">Service 1</a></li>
@@ -71,9 +73,8 @@
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item" href="#">Something else here</a></li>
                                 </ul>
-                            </li>
-                            <li class="nav-item"><a class="nav-link" href="#">About</a></li>
-                            <li class="nav-item"><a class="nav-link" href="#">{{ user.first_name }}</a></li>
+                            </li> {% endcomment %}
+                            <li class="nav-item"><a class="nav-link" href="#">Bem-vindo(a), {{ user.first_name }}</a></li>
                         </ul>
                     </div>
                 </div>
@@ -92,14 +93,25 @@
             const sidebarCollapse = document.getElementById('sidebarCollapse');
             const themeToggle = document.getElementById('themeToggle');
             const body = document.body;
-
+    
+            // Verifica o tema salvo no localStorage
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                body.classList.remove('light-theme', 'dark-theme');
+                body.classList.add(savedTheme);
+            }
+    
             sidebarCollapse.addEventListener('click', function() {
                 sidebar.classList.toggle('active');
             });
-
+    
             themeToggle.addEventListener('click', function() {
                 body.classList.toggle('dark-theme');
                 body.classList.toggle('light-theme');
+    
+                // Salva o tema atual no localStorage
+                const currentTheme = body.classList.contains('dark-theme') ? 'dark-theme' : 'light-theme';
+                localStorage.setItem('theme', currentTheme);
             });
         });
     </script>

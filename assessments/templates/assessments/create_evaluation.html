@@ -1,6 +1,6 @@
 {% extends "base.html" %} {% load static %} {% block content %}
 <div class="container mt-5">
-  <h2>Realizar Avaliação</h2>
+  <h2 class="text-center">Realizar Avaliação</h2>
   {% if pending_schedules %}
   <form method="post" id="evaluationForm" class="needs-validation" novalidate>
     {% csrf_token %}
@@ -29,7 +29,7 @@
     {% endif %}
   </form>
   {% else %}
-  <p>Você não tem avaliações pendentes.</p>
+  <p class="text-center">Você não tem avaliações pendentes.</p>
   {% endif %}
 </div>
 

@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from .forms import EvaluationScheduleForm, AnalysisForm
 from .models import EvaluationSchedule, Evaluation, Answer, Question
 from accounts.models import CustomUser
@@ -10,12 +10,18 @@ from django import forms
 import altair as alt
 from django.utils.safestring import mark_safe
 from django.db.models import Avg
+from django.db.models import Q
 
 
-
+def is_in_agendamento_group(user):
+    return user.groups.filter(name='Agendamento').exists()
 
 @login_required
+@user_passes_test(is_in_agendamento_group)  # Verifica se o usuário está no grupo 'Agendamento'
 def schedule_evaluation(request):
+
+    is_in_control_group = request.user.groups.filter(name='Agendamento').exists()
+
     if request.method == 'POST':
         form = EvaluationScheduleForm(request.POST, user=request.user)
         if form.is_valid():
@@ -64,16 +70,31 @@ def create_evaluation(request):
 
 @login_required
 def view_evaluations(request):
-    evaluations = Evaluation.objects.filter(schedule__evaluator=request.user)
+    is_in_control_group = request.user.groups.filter(name='Gestão').exists()
+
+    if is_in_control_group:
+        evaluations = Evaluation.objects.filter()
+    else:
+        evaluations = Evaluation.objects.filter(
+        Q(schedule__evaluator=request.user) | Q(schedule__evaluatee=request.user)
+    )
+
     return render(request, 'assessments/view_evaluations.html', {
         'evaluations': evaluations,
     })
 
 @login_required
 def view_scheduled_evaluations(request):
-    scheduled_evaluations = EvaluationSchedule.objects.filter(evaluation__isnull=True)
+    is_in_control_group = request.user.groups.filter(name='Agendamento').exists()
+
+    if is_in_control_group:
+        scheduled_evaluations = EvaluationSchedule.objects.filter(evaluation__isnull=True)
+    else:
+        scheduled_evaluations = EvaluationSchedule.objects.filter(evaluation__isnull=True, evaluator=request.user)
+
     return render(request, 'assessments/view_scheduled_evaluations.html', {
         'scheduled_evaluations': scheduled_evaluations,
+        'is_in_control_group': is_in_control_group,  # Passando o valor para o template
     })
 
 

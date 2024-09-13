@@ -1,11 +1,14 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from .forms import ClientForm, CustomUserCreationForm, CustomUserChangeForm
 from .models import Client, CustomUser
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+
+# Função para verificar se o usuário está no grupo 'controle'
+def is_in_control_group(user):
+    return user.is_authenticated and user.groups.filter(name='Controle').exists()
 
 # views.py
 def register_view(request):
@@ -21,12 +24,13 @@ def register_view(request):
     
     return render(request, 'register.html', {'form': form})
 
-
+@user_passes_test(is_in_control_group)
 @login_required
 def list_users(request):
     users = CustomUser.objects.all()
     return render(request, 'users/list_users.html', {'users': users})
 
+@user_passes_test(is_in_control_group)
 @login_required
 def add_user(request):
     if request.method == 'POST':
@@ -38,6 +42,7 @@ def add_user(request):
         form = CustomUserCreationForm()
     return render(request, 'users/add_user.html', {'form': form})
 
+@user_passes_test(is_in_control_group)
 @login_required
 def edit_user(request, user_id):
     user = get_object_or_404(CustomUser, id=user_id)
@@ -50,6 +55,7 @@ def edit_user(request, user_id):
         form = CustomUserChangeForm(instance=user)
     return render(request, 'users/edit_user.html', {'form': form, 'user': user})
 
+@user_passes_test(is_in_control_group)
 @login_required
 def delete_user(request, user_id):
     user = get_object_or_404(CustomUser, id=user_id)
@@ -81,6 +87,7 @@ def logout_view(request):
     logout(request)
     return redirect('login')
 
+@user_passes_test(is_in_control_group)
 @login_required
 def add_client(request):
     if request.method == 'POST':
@@ -92,11 +99,13 @@ def add_client(request):
         form = ClientForm()
     return render(request, 'clients/add_client.html', {'form': form})
 
+@user_passes_test(is_in_control_group)
 @login_required
 def list_clients(request):
     clients = Client.objects.all()
     return render(request, 'clients/list_clients.html', {'clients': clients})
 
+@user_passes_test(is_in_control_group)
 @login_required
 def edit_client(request, client_id):
     client = get_object_or_404(Client, id=client_id)
@@ -109,6 +118,7 @@ def edit_client(request, client_id):
         form = ClientForm(instance=client)
     return render(request, 'clients/edit_client.html', {'form': form, 'client': client})
 
+@user_passes_test(is_in_control_group)
 @login_required
 def delete_client(request, client_id):
     client = get_object_or_404(Client, id=client_id)

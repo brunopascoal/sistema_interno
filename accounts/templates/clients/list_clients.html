@@ -1,6 +1,6 @@
 {% extends "base.html" %} {% load static %} {% block content %}
 <div class="container mt-5">
-  <h2 class="mb-4">Lista de Clientes</h2>
+  <h2 class="text-center">Lista de Clientes</h2>
   <a href="{% url 'add_client' %}" class="btn btn-success mb-3"
     >Adicionar Cliente</a
   >
@@ -26,11 +26,11 @@
               class="btn btn-primary btn-sm"
               >Editar</a
             >
-            <a
+            {% comment %} <a
               href="{% url 'delete_client' client.id %}"
               class="btn btn-danger btn-sm"
               >Excluir</a
-            >
+            > {% endcomment %}
           </td>
         </tr>
         {% endfor %}
