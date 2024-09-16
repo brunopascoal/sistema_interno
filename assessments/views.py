@@ -196,6 +196,12 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from .forms import AnalysisForm
 
+import pandas as pd
+import altair as alt
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from django.utils.safestring import mark_safe
+
 @login_required
 def analysis(request):
     # Verificamos se o usuário pertence ao grupo 'Gestão'
@@ -246,7 +252,7 @@ def analysis(request):
                     weighted_normal = avg_normal * question.weight_question  # Multiplica a média pelo peso
                     data.append({
                         'Pergunta': question.text, 
-                        'Tipo': 'Avaliação', 
+                        'Tipo': 'Real', 
                         'Média': weighted_normal,  # Média ponderada
                         'Peso': question.weight_question  # Mantém o peso para o tooltip
                     })
@@ -256,25 +262,40 @@ def analysis(request):
                     weighted_self = avg_self * question.weight_question  # Multiplica a média pelo peso
                     data.append({
                         'Pergunta': question.text, 
-                        'Tipo': 'Autoavaliação', 
+                        'Tipo': 'Auto', 
                         'Média': weighted_self,  # Média ponderada
                         'Peso': question.weight_question  # Mantém o peso para o tooltip
                     })
+                
+                # Adiciona a nova métrica: Peso * 3
+                weighted_triple = question.weight_question * 3
+                data.append({
+                    'Pergunta': question.text,
+                    'Tipo': 'Ponto Desejável',
+                    'Média': weighted_triple,
+                    'Peso': question.weight_question  # Mantém o peso para o tooltip
+                })
 
             # Criação do DataFrame e do gráfico com Altair
             df = pd.DataFrame(data)
 
             if not df.empty:  # Verifica se há dados para gerar o gráfico
+                # Definir uma escala de cores personalizada
+                color_scale = alt.Scale(
+                    domain=['Real', 'Auto', 'Ponto Desejável'],
+                    range=['#1027BC', '#999999', '#000000']  # Defina as cores desejadas aqui
+                )
+
                 chart = alt.Chart(df).mark_bar().encode(
                     x=alt.X('Pergunta:N', title=None, axis=alt.Axis(labelAngle=-45)),
                     y=alt.Y('Média:Q', title=None),
-                    color='Tipo:N',
+                    color=alt.Color('Tipo:N', scale=color_scale, legend=alt.Legend(title="Tipo")),
                     xOffset='Tipo:N',  # Isso permite o deslocamento das barras para o mesmo eixo x
                     tooltip=['Pergunta:N', 'Tipo:N', 'Média:Q', 'Peso:Q']  # Exibe o peso da pergunta no tooltip
                 ).properties(
                     width=600,
                     height=400,
-                    title=f'Média das Notas por Pergunta (Ponderada pelo Peso) para {user.username}'
+                    title=f'Média das Notas por Pergunta (Ponderada pelo Peso) para {user.first_name}'
                 ).interactive()
 
                 chart_json = chart.to_json()

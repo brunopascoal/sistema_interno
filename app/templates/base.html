@@ -15,12 +15,12 @@
         <!-- Sidebar -->
         <nav id="sidebar" class="active">
             <div class="sidebar-header">
-                <img
-                  src="{% static 'accounts/images/logo.png' %}"
-                  alt="Logo"
-                  class="img-fluid mb-4"
-                  style="max-width: 200px; height: 80px;"
-                />
+                <a href="{% url 'homepage' %}">
+                    <img src="{% static 'accounts/images/img_logo.jfif' %}" 
+                         alt="Logo" 
+                         class="img-fluid mb-4" 
+                         style="max-width: 200px; height: 80px;" />
+                </a>
             </div>
             <ul class="list-unstyled components">
                 <li class="active">

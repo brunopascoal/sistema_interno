@@ -19,7 +19,7 @@
         <tr>
           <td>{{ client.id }}</td>
           <td>{{ client.name }}</td>
-          <td>{{ client.responsible.username }}</td>
+          <td>{{ client.responsible.first_name }} {{ client.responsible.last_name }}</td>
           <td>
             <a
               href="{% url 'edit_client' client.id %}"

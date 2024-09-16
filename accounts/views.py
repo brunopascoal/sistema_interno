@@ -5,11 +5,13 @@ from .forms import ClientForm, CustomUserCreationForm, CustomUserChangeForm
 from .models import Client, CustomUser
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib import messages
 
 # Função para verificar se o usuário está no grupo 'controle'
 def is_in_control_group(user):
     return user.is_authenticated and user.groups.filter(name='Controle').exists()
 
+# views.py
 # views.py
 def register_view(request):
     if request.method == 'POST':
@@ -18,11 +20,13 @@ def register_view(request):
             user = form.save(commit=False)
             user.is_approved = False  # O usuário não será aprovado automaticamente
             user.save()
+            messages.success(request, 'Conta criada com sucesso.')
             return redirect('login')  # Redireciona para a página de login após o registro
     else:
         form = CustomUserCreationForm()
     
     return render(request, 'register.html', {'form': form})
+
 
 @user_passes_test(is_in_control_group)
 @login_required
