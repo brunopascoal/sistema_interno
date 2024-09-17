@@ -29,9 +29,9 @@
                         <li><a href="{% url 'create_evaluation' %}">Realizar Avaliação</a></li>
                         <li><a href="{% url 'view_evaluations' %}">Consultar Avaliações</a></li>
                         <li><a href="{% url 'view_scheduled_evaluations' %}">Avaliações Agendadas</a></li>
-                        {% if is_in_schedule_group %}
+                        {% comment %} {% if is_in_schedule_group %} {% endcomment %}
                             <li><a href="{% url 'schedule_evaluation' %}">Agendar Avaliação</a></li>
-                        {% endif %}
+                        {% comment %} {% endif %} {% endcomment %}
                         <li><a href="{% url 'analysis' %}">Análise de Avaliações</a></li>
 
 

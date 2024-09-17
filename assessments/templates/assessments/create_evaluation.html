@@ -2,7 +2,7 @@
 <div class="container mt-5">
   <h2 class="text-center">Realizar Avaliação</h2>
   {% if pending_schedules %}
-  <form method="post" id="evaluationForm" class="needs-validation" novalidate>
+  <form method="post" id="evaluationForm" class="needs-validation">
     {% csrf_token %}
     <div class="mb-3">
       <label for="schedule_id" class="form-label">Selecione a Avaliação:</label>
@@ -57,9 +57,10 @@
                 <option value="5">5</option>
               </select>
               <div class="invalid-feedback">Por favor, selecione uma nota.</div>
-              <textarea name="comment_${question.id}" id="comment_${question.id}" class="form-control mt-2" placeholder="Observação (necessário se a resposta for menor que 3)" style="display:none;" required></textarea>
+              <textarea name="comment_${question.id}" id="comment_${question.id}" class="form-control mt-2" placeholder="Observação (necessário se a resposta for menor que 3)" style="display:none;" disabled></textarea>
               <div class="invalid-feedback">Por favor, adicione um comentário se a nota for menor que 3.</div>
             `;
+
             questionsDiv.appendChild(questionDiv);
           });
           questionsContainer.style.display = "block";
@@ -74,10 +75,32 @@
     var comment = document.getElementById(`comment_${questionId}`);
     if (score && score < 3) {
       comment.style.display = "block";
+      comment.removeAttribute('disabled');
+      comment.setAttribute('required', 'required');
     } else {
       comment.style.display = "none";
       comment.value = ""; // Limpa o campo de comentário se não for necessário
+      comment.setAttribute('disabled', 'disabled');
+      comment.removeAttribute('required');
     }
   }
+  
+</script>
+
+<script>
+  (function () {
+    'use strict';
+
+    var form = document.getElementById('evaluationForm');
+
+    form.addEventListener('submit', function (event) {
+      if (!form.checkValidity()) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+
+      form.classList.add('was-validated');
+    }, false);
+  })();
 </script>
 {% endblock %}
