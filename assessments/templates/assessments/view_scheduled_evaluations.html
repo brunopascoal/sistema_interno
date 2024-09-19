@@ -10,6 +10,7 @@
           <th>Avaliado</th>
           <th>Cliente</th>
           <th>Data Agendada</th>
+          <th>Ações</th>
         </tr>
       </thead>
       <tbody>
@@ -19,6 +20,17 @@
           <td>{{ schedule.evaluatee.username }}</td>
           <td>{{ schedule.client.name }}</td>
           <td>{{ schedule.date_scheduled|date:"d/m/Y" }}</td>
+          <td>
+            <!-- Botão para excluir o agendamento -->
+            <form action="{% url 'delete_schedule' schedule.id %}" method="POST" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Tem certeza que deseja excluir este agendamento?')">Excluir</button>
+            </form>
+            
+            <!-- Botão para baixar a avaliação, se disponível -->
+            <a href="{% url 'edit_schedule' schedule.id %}" class="btn btn-primary">Editar</a>
+ 
+        </td>
         </tr>
         {% endfor %}
       </tbody>

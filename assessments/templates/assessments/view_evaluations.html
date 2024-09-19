@@ -20,7 +20,7 @@
                     <th scope="col"><button class="btn btn-link text-decoration-none" onclick="sortTable(1)">Avaliado <i class="bi bi-arrow-down-up"></i></button></th>
                     <th scope="col"><button class="btn btn-link text-decoration-none" onclick="sortTable(2)">Cliente <i class="bi bi-arrow-down-up"></i></button></th>
                     <th scope="col"><button class="btn btn-link text-decoration-none" onclick="sortTable(3)">Data <i class="bi bi-arrow-down-up"></i></button></th>
-                    <th scope="col" >Ações</th>
+                    <th scope="col"><button class="btn btn-link text-decoration-none" onclick="sortTable(4)">Ações <i class="bi bi-arrow-down-up"></i></button></th>
                 </tr>
             </thead>
             <tbody id="tableBody">
@@ -41,7 +41,7 @@
     </div>
 
     <!-- Paginação -->
-    <div class="d-flex justify-content-end">
+    {% comment %} <div class="d-flex justify-content-end">
         <nav aria-label="Table navigation">
             <ul class="pagination mb-0">
                 <li class="page-item disabled">
@@ -55,10 +55,9 @@
                 </li>
             </ul>
         </nav>
-    </div>
+    </div> {% endcomment %}
 </div>
 
-<!-- Adicionando o CSS dentro da página -->
 <style>
     /* Estilos gerais para a tabela */
 table {

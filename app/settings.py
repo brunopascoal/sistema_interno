@@ -26,9 +26,9 @@ SECRET_KEY = "django-insecure-jlnw^r*-9hvveq3degacv)wcntaj!8_^)n)f=b3a7l^i!nm+s@
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '3dde-177-47-86-143.ngrok-free.app']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'f90f-177-47-86-143.ngrok-free.app']
 
-CSRF_TRUSTED_ORIGINS = ['https://3dde-177-47-86-143.ngrok-free.app']
+CSRF_TRUSTED_ORIGINS = ['https://f90f-177-47-86-143.ngrok-free.app']
 
 # Application definition
 
@@ -59,10 +59,11 @@ MIDDLEWARE = [
 # Configurações de sessão
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_COOKIE_NAME = 'sessionid'
-SESSION_COOKIE_AGE = 400  # 5 minutos
+SESSION_COOKIE_AGE = 7200  # 2 horas
 SESSION_COOKIE_SECURE = True  # Apenas via HTTPS
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 SESSION_COOKIE_HTTPONLY = True  # Maior segurança
+SESSION_SAVE_EVERY_REQUEST = True
 
 ROOT_URLCONF = "app.urls"
 
@@ -78,6 +79,8 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "app.context_processors.control_group",
+                "app.context_processors.schedule_group",
+
 
             ],
         },

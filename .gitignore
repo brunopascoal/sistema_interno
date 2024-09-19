@@ -6,3 +6,4 @@ __pycache__/
 STRUCTURE.md
 venv/
 *.pyc
+teste.py

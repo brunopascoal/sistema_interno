@@ -1,0 +1,16 @@
+<!-- edit_schedule.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Editar Agendamento</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+            {{ form.as_p }}
+        </div>
+        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+        <a href="{% url 'view_scheduled_evaluations' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

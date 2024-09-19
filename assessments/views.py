@@ -11,6 +11,7 @@ import altair as alt
 from django.utils.safestring import mark_safe
 from django.db.models import Avg
 from django.db.models import Q
+from django.contrib import messages
 
 
 def is_in_agendamento_group(user):
@@ -41,6 +42,18 @@ def schedule_evaluation(request):
     
     return render(request, 'assessments/schedule_evaluation.html', {'form': form})
 
+@login_required
+def delete_schedule(request, schedule_id):
+    schedule = get_object_or_404(EvaluationSchedule, id=schedule_id)
+    
+    # Verifique se o usuário é o avaliador ou faz parte do grupo de controle
+    if request.user == schedule.evaluator or request.user.groups.filter(name='Agendamento').exists():
+        schedule.delete()
+        messages.success(request, 'Agendamento excluído com sucesso.')
+    else:
+        messages.error(request, 'Você não tem permissão para excluir este agendamento.')
+
+    return redirect('view_scheduled_evaluations')
 
 @login_required
 def create_evaluation(request):
@@ -66,7 +79,25 @@ def create_evaluation(request):
         'pending_schedules': pending_schedules,
     })
 
+@login_required
+def edit_schedule(request, schedule_id):
+    schedule = get_object_or_404(EvaluationSchedule, id=schedule_id)
 
+    # Verifique se o usuário tem permissão para editar
+    if request.user != schedule.evaluator and not request.user.groups.filter(name='Gestão').exists():
+        messages.error(request, 'Você não tem permissão para editar este agendamento.')
+        return redirect('view_scheduled_evaluations')
+
+    if request.method == 'POST':
+        form = EvaluationScheduleForm(request.POST, instance=schedule, user=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Agendamento atualizado com sucesso.')
+            return redirect('view_scheduled_evaluations')
+    else:
+        form = EvaluationScheduleForm(instance=schedule, user=request.user)
+
+    return render(request, 'assessments/edit_schedule.html', {'form': form, 'schedule': schedule})
 
 @login_required
 def view_evaluations(request):

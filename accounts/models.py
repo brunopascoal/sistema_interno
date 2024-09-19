@@ -33,4 +33,4 @@ class Client(models.Model):
     responsible = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.name
+        return f"{self.name} (Responsável: {self.responsible.get_full_name()})"
