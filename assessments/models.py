@@ -12,16 +12,35 @@ class Question(models.Model):
         return self.text
 
 class EvaluationSchedule(models.Model):
+    COMMITMENT_CHOICES = [
+        ('Auditoria externa - Preliminar', 'Auditoria externa - Preliminar'),
+        ('Auditoria externa - Controle Interno', 'Auditoria externa - Controle Interno'),
+        ('Auditoria externa - Final', 'Auditoria externa - Final'),
+        ('Inventário', 'Inventário'),
+        ('Serviços Financeiros', 'Serviços Financeiros'),
+        ('Auditoria Interna', 'Auditoria Interna'),
+        ('Incorporação', 'Incorporação'),
+        ('Auditoria Cooperativa', 'Auditoria Cooperativa'),
+        ('Demonstrações Financeiras - Final', 'Demonstrações Financeiras - Final'),
+        ('Demonstrações Financeiras - Preliminar', 'Demonstrações Financeiras - Preliminar'),
+        ('Auditoria contínua', 'Auditoria contínua'),
+        ('Revisão contábil', 'Revisão contábil'),
+        ('Outros', 'Outros'),
+    ]
+
     evaluator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='evaluation_schedules')
     evaluatee = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='evaluation_scheduled')
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
-    department = models.ForeignKey(Department, on_delete=models.CASCADE, default=1)  # Defina o valor padrão aqui
-    role = models.ForeignKey(Role, on_delete=models.CASCADE, default=1)  # Defina o valor padrão aqui
+    department = models.ForeignKey(Department, on_delete=models.CASCADE, default=1)
+    role = models.ForeignKey(Role, on_delete=models.CASCADE, default=1)
     date_scheduled = models.DateField()
-    self_evaluation = models.BooleanField(default=False)  # Novo campo para autoavaliação
+    self_evaluation = models.BooleanField(default=False)
+    commitment = models.CharField(max_length=50, choices=COMMITMENT_CHOICES)
+    other_commitment = models.CharField(max_length=255, blank=True, null=True)  # Campo para "Outros"
 
     def __str__(self):
         return f"Evaluation scheduled by {self.evaluator} for {self.evaluatee} on {self.date_scheduled}"
+
 
 class Evaluation(models.Model):
     schedule = models.OneToOneField(EvaluationSchedule, on_delete=models.CASCADE)

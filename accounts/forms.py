@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from .models import Client, CustomUser
+import re
 
 class ClientForm(forms.ModelForm):
     class Meta:
@@ -21,11 +22,11 @@ class CustomUserCreationForm(UserCreationForm):
             raise forms.ValidationError("Você só pode se registrar com um email @moorebrasil.com.br")
         return email
 
-    def clean_username(self):
-        username = self.cleaned_data.get('username')
-        if not username.isalnum():
-            raise forms.ValidationError("O nome de usuário deve conter apenas letras e números.")
-        return username
+    # def clean_username(self):
+    #     username = self.cleaned_data.get('username')
+    #     if not username.isalnum():
+    #         raise forms.ValidationError("O nome de usuário deve conter apenas letras e números.")
+    #     return username
 
     def clean(self):
         cleaned_data = super().clean()
@@ -42,14 +43,16 @@ class CustomUserCreationForm(UserCreationForm):
         
     def clean_first_name(self):
         first_name = self.cleaned_data.get('first_name')
-        if not first_name.isalpha():
-            raise forms.ValidationError('O primeiro nome deve conter apenas letras.')
+        # Permitir letras e espaços
+        if not re.match(r'^[A-Za-zÀ-ÖØ-öø-ÿ\s]+$', first_name):
+            raise forms.ValidationError('O primeiro nome deve conter apenas letras e espaços.')
         return first_name
 
     def clean_last_name(self):
         last_name = self.cleaned_data.get('last_name')
-        if not last_name.isalpha():
-            raise forms.ValidationError('O último nome deve conter apenas letras.')
+        # Permitir letras e espaços
+        if not re.match(r'^[A-Za-zÀ-ÖØ-öø-ÿ\s]+$', last_name):
+            raise forms.ValidationError('O último nome deve conter apenas letras e espaços.')
         return last_name
 
 

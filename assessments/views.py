@@ -42,18 +42,20 @@ def schedule_evaluation(request):
     
     return render(request, 'assessments/schedule_evaluation.html', {'form': form})
 
-@login_required
-def delete_schedule(request, schedule_id):
-    schedule = get_object_or_404(EvaluationSchedule, id=schedule_id)
-    
-    # Verifique se o usuário é o avaliador ou faz parte do grupo de controle
-    if request.user == schedule.evaluator or request.user.groups.filter(name='Agendamento').exists():
-        schedule.delete()
-        messages.success(request, 'Agendamento excluído com sucesso.')
-    else:
-        messages.error(request, 'Você não tem permissão para excluir este agendamento.')
 
-    return redirect('view_scheduled_evaluations')
+@login_required
+def delete_selected_schedules(request):
+    if request.method == 'POST':
+        schedule_ids = request.POST.getlist('schedules')  # Obtém a lista de IDs dos agendamentos selecionados
+        if schedule_ids:
+            EvaluationSchedule.objects.filter(id__in=schedule_ids).delete()  # Exclui os agendamentos correspondentes
+            messages.success(request, "Agendamentos selecionados foram excluídos com sucesso.")
+        else:
+            messages.warning(request, "Nenhum agendamento foi selecionado.")
+    return redirect('view_scheduled_evaluations')  # Certifique-se que esta é a URL correta para redirecionar após a exclusão
+
+
+
 
 @login_required
 def create_evaluation(request):
