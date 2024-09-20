@@ -23,8 +23,8 @@
           {% for schedule in scheduled_evaluations %}
           <tr>
             <td><input type="checkbox" name="schedules" value="{{ schedule.id }}"></td>
-            <td>{{ schedule.evaluator.username }}</td>
-            <td>{{ schedule.evaluatee.username }}</td>
+            <td>{{ schedule.evaluator.first_name }} {{ schedule.evaluator.last_name }}</td> 
+            <td>{{ schedule.evaluatee.first_name }} {{ schedule.evaluatee.last_name }}</td>
             <td>{{ schedule.client.name }}</td>
             <td>{{ schedule.date_scheduled|date:"d/m/Y" }}</td>
             <td>

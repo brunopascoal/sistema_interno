@@ -17,30 +17,41 @@ from django.contrib import messages
 def is_in_agendamento_group(user):
     return user.groups.filter(name='Agendamento').exists()
 
-@login_required
-@user_passes_test(is_in_agendamento_group)  # Verifica se o usuário está no grupo 'Agendamento'
-def schedule_evaluation(request):
+# views.py
 
-    is_in_control_group = request.user.groups.filter(name='Agendamento').exists()
+# views.py
+
+@login_required
+@user_passes_test(is_in_agendamento_group)
+def schedule_evaluation(request):
 
     if request.method == 'POST':
         form = EvaluationScheduleForm(request.POST, user=request.user)
         if form.is_valid():
-            schedule = form.save(commit=False)
-            schedule.department = request.user.department  # Define o departamento automaticamente
-            schedule.role = request.user.role  # Define o cargo automaticamente
-            
-            # Verifica se é uma autoavaliação
-            if schedule.evaluator == schedule.evaluatee:
-                schedule.self_evaluation = True  # Marca como autoavaliação automaticamente
-            
-            schedule.save()
-            
+            evaluator = form.cleaned_data['evaluator']
+            evaluatees = form.cleaned_data['evaluatee']
+            client = form.cleaned_data['client']
+            date_scheduled = form.cleaned_data['date_scheduled']
+
+            for evaluatee in evaluatees:
+                schedule = EvaluationSchedule(
+                    evaluator=evaluator,
+                    evaluatee=evaluatee,
+                    client=client,
+                    date_scheduled=date_scheduled,
+                    department=request.user.department,
+                    role=request.user.role,
+                )
+                if evaluator == evaluatee:
+                    schedule.self_evaluation = True
+                schedule.save()
+
             return redirect('view_scheduled_evaluations')
     else:
         form = EvaluationScheduleForm(user=request.user)
-    
+
     return render(request, 'assessments/schedule_evaluation.html', {'form': form})
+
 
 
 @login_required
