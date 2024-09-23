@@ -7,11 +7,10 @@ from accounts.models import CustomUser, Client
 
 class EvaluationScheduleForm(forms.Form):
     evaluator = forms.ModelChoiceField(
-        queryset=CustomUser.objects.all(),
+        queryset=CustomUser.objects.none(),
         widget=forms.Select(attrs={'class': 'form-select'}),
         label='Avaliador',
         empty_label=None  # Remove a opção vazia
-
     )
     evaluatee = forms.ModelMultipleChoiceField(
         queryset=CustomUser.objects.none(),
@@ -31,9 +30,15 @@ class EvaluationScheduleForm(forms.Form):
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user')
         super().__init__(*args, **kwargs)
+
+        # Filtra os avaliadores e avaliados pelo departamento do usuário logado
+        self.fields['evaluator'].queryset = CustomUser.objects.filter(department=user.department)
         self.fields['evaluatee'].queryset = CustomUser.objects.filter(department=user.department)
+
+        # Adiciona a classe 'form-select' aos campos
         for visible in self.visible_fields():
             visible.field.widget.attrs['class'] = 'form-select'
+
 
 
 

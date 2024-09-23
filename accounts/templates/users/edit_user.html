@@ -1,12 +1,12 @@
-{% extends "base.html" %} 
-{% load static %} 
+{% extends "base.html" %}
+{% load static %}
 
 {% block content %}
 <div class="container mt-5">
   <h2 class="mb-4">Editar Usuário</h2>
-  <form method="post" class="needs-validation" novalidate>
+  <form method="post" novalidate>
     {% csrf_token %}
-    
+
     <div class="form-group">
       {{ form.username.label_tag }}
       {{ form.username }}
@@ -37,11 +37,11 @@
       {{ form.role }}
     </div>
 
-    <div class="form-check">
-      {{ form.is_approved.label_tag }}
+    <div class="form-check mb-3">
       {{ form.is_approved }}
+      {{ form.is_approved.label_tag }}
     </div>
-    
+
     <button type="submit" class="btn btn-primary">Salvar</button>
     <a href="{% url 'list_users' %}" class="btn btn-secondary">Cancelar</a>
   </form>

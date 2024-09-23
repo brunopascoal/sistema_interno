@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-from .models import Client, CustomUser
+from .models import Client, CustomUser, Department, Role
 import re
 
 class ClientForm(forms.ModelForm):
@@ -58,7 +58,42 @@ class CustomUserCreationForm(UserCreationForm):
 
 
 class CustomUserChangeForm(UserChangeForm):
+    username = forms.CharField(
+        label='Nome de Usuário',
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    first_name = forms.CharField(
+        label='Primeiro Nome',
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    last_name = forms.CharField(
+        label='Sobrenome',
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    email = forms.EmailField(
+        label='E-mail',
+        widget=forms.EmailInput(attrs={'class': 'form-control'})
+    )
+    department = forms.ModelChoiceField(
+        queryset=Department.objects.all(),
+        label='Departamento',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    role = forms.ModelChoiceField(
+        queryset=Role.objects.all(),
+        label='Função',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    is_approved = forms.BooleanField(
+        label='Aprovado',
+        required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
+
     class Meta:
         model = CustomUser
-        fields = ('username', 'first_name', 'last_name', 'email', 'department', 'role', 'is_approved')
+        fields = (
+            'username', 'first_name', 'last_name', 'email',
+            'department', 'role', 'is_approved'
+        )
         exclude = ('password',)
