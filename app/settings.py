@@ -97,7 +97,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'audito66_coredata',
-        'USER': 'audito66_kviana',
+        'USER': 'audito66_coreuser',
         'PASSWORD': 'eHH48zjblM!&',
         'HOST': '108.167.132.224',  # Ex: 'mysql.seudominio.com'
         'PORT': '3306',
