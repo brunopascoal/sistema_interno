@@ -32,6 +32,9 @@ jobs:
           source venv/bin/activate
           pip install -r requirements.txt
 
+      - name: Create static directory if it does not exist
+        run: mkdir -p static
+
       # Run Django collectstatic command to gather static files
       - name: Run collectstatic
         run: |
