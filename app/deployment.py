@@ -37,5 +37,6 @@ DATABASES = {
         'PORT': conn_str_params.get('port', '5432'),        
 =======
 >>>>>>> a2d4395 (Raw: Correção no project name no wsgi.py)
+        'PORT': conn_str_params.get('port', '5432'),        
     }
 }
