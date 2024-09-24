@@ -38,6 +38,9 @@ jobs:
           pip install -r requirements.txt
 >>>>>>> f055eb2 (Update main_admooreprisma.yml)
 
+      - name: Create static directory if it does not exist
+        run: mkdir -p static
+
       # Run Django collectstatic command to gather static files
       - name: Run collectstatic
 <<<<<<< HEAD
