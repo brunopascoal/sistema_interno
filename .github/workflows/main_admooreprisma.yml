@@ -33,8 +33,12 @@ jobs:
 =======
 
       - name: Run collectstatic
+<<<<<<< HEAD
         run: python manage.py collectstatic
 >>>>>>> 7a46666 (Update main_admooreprisma.yml)
+=======
+        run: python manage.py collectstatic --noinput
+>>>>>>> f82878b (Update main_admooreprisma.yml)
         
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
 
