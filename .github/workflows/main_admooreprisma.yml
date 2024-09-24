@@ -29,6 +29,12 @@ jobs:
       # Install dependencies from requirements.txt
       - name: Install dependencies
         run: pip install -r requirements.txt
+<<<<<<< HEAD
+=======
+
+      - name: Run collectstatic
+        run: python manage.py collectstatic
+>>>>>>> 7a46666 (Update main_admooreprisma.yml)
         
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
 
