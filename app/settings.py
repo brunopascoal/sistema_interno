@@ -26,9 +26,9 @@ SECRET_KEY = "django-insecure-jlnw^r*-9hvveq3degacv)wcntaj!8_^)n)f=b3a7l^i!nm+s@
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = []
 
-CSRF_TRUSTED_ORIGINS = ['https://71ae-177-47-86-157.ngrok-free.app']
+CSRF_TRUSTED_ORIGINS = []
 
 # Application definition
 
@@ -101,6 +101,7 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
 
 
 # Password validation
