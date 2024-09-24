@@ -28,24 +28,10 @@ jobs:
       
       # Install dependencies from requirements.txt
       - name: Install dependencies
-        run: |
-          source venv/bin/activate
-          pip install -r requirements.txt
+        run: pip install -r requirements.txt
+        
+      # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
 
-      - name: Create static directory if it does not exist
-        run: mkdir -p static
-
-      # Run Django collectstatic command to gather static files
-      - name: Run collectstatic
-        run: |
-          source venv/bin/activate
-          python manage.py collectstatic --noinput
-
-      # Optional: Run tests here (like PyTest or Django test suites)
-      # - name: Run tests
-      #   run: python manage.py test
-
-      # Zip the artifact for deployment
       - name: Zip artifact for deployment
         run: |
           zip -r release.zip . --exclude './venv/*'
