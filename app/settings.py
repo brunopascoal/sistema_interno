@@ -150,12 +150,6 @@ STATICFILES_DIRS = [
 # Diretório onde o Django irá coletar os arquivos estáticos com o comando collectstatic
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Diretórios adicionais de arquivos estáticos (usado durante o desenvolvimento)
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),  # Certifique-se de que esse diretório existe
-]
-
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
