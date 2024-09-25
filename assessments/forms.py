@@ -3,6 +3,8 @@ from .models import EvaluationSchedule, Evaluation, Answer, Work
 from accounts.models import CustomUser, Client
 
 
+# forms.py
+
 class ScheduleForm(forms.ModelForm):
     COMMITMENT_CHOICES = [
         ('Auditoria externa - Preliminar', 'Auditoria externa - Preliminar'),
@@ -22,9 +24,9 @@ class ScheduleForm(forms.ModelForm):
 
     class Meta:
         model = Work
-        fields = ['name', 'client', 'date_scheduled', 'responsible', 'evaluator', 'commitment', 'other_commitment', 'evaluatees']
+        # Removemos o campo 'name' da lista de campos exibidos no formulário
+        fields = ['client', 'date_scheduled', 'responsible', 'evaluator', 'commitment', 'other_commitment', 'evaluatees']
 
-    # Para widgets personalizados
     client = forms.ModelChoiceField(
         queryset=Client.objects.all(),
         widget=forms.Select(attrs={'class': 'form-select'}),
@@ -40,21 +42,6 @@ class ScheduleForm(forms.ModelForm):
         label='Responsável'
     )
     
-    def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)
-        super(ScheduleForm, self).__init__(*args, **kwargs)
-    
-        if user:
-            # Filtrar avaliadores e avaliados pelo departamento do usuário logado e excluir usuários sem departamento
-            department = user.department
-            if department:
-                self.fields['evaluator'].queryset = CustomUser.objects.filter(is_active=True, department=department).exclude(department__isnull=True)
-                self.fields['evaluatees'].queryset = CustomUser.objects.filter(is_active=True, department=department).exclude(department__isnull=True)
-            else:
-                # Caso o usuário logado não tenha um departamento, você pode lidar com isso conforme a sua necessidade
-                self.fields['evaluator'].queryset = CustomUser.objects.none()
-                self.fields['evaluatees'].queryset = CustomUser.objects.none()
-
     evaluator = forms.ModelChoiceField(
         queryset=CustomUser.objects.filter(is_active=True),
         widget=forms.Select(attrs={'class': 'form-select'}),
@@ -79,6 +66,19 @@ class ScheduleForm(forms.ModelForm):
         label='Outro Compromisso'
     )
 
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super(ScheduleForm, self).__init__(*args, **kwargs)
+    
+        if user:
+            department = user.department
+            if department:
+                self.fields['evaluator'].queryset = CustomUser.objects.filter(is_active=True, department=department)
+                self.fields['evaluatees'].queryset = CustomUser.objects.filter(is_active=True, department=department)
+            else:
+                self.fields['evaluator'].queryset = CustomUser.objects.none()
+                self.fields['evaluatees'].queryset = CustomUser.objects.none()
+
     def clean(self):
         cleaned_data = super().clean()
         commitment = cleaned_data.get('commitment')
@@ -86,6 +86,7 @@ class ScheduleForm(forms.ModelForm):
 
         if commitment == 'Outros' and not other_commitment:
             self.add_error('other_commitment', 'Por favor, especifique o compromisso.')
+
 
 
         

@@ -26,11 +26,10 @@ def is_in_agendamento_group(user):
 @user_passes_test(is_in_agendamento_group)
 def schedule_evaluation(request):
     if request.method == 'POST':
-        form = ScheduleForm(request.POST)
+        form = ScheduleForm(request.POST, user=request.user)  # Passa o usuário logado para o formulário
         if form.is_valid():
             # Criar o Work com os novos campos
             work = Work.objects.create(
-                name=form.cleaned_data['name'],
                 client=form.cleaned_data['client'],
                 date_scheduled=form.cleaned_data['date_scheduled'],
                 responsible=form.cleaned_data['responsible'],
@@ -60,8 +59,9 @@ def schedule_evaluation(request):
             messages.success(request, 'Agendamentos criados com sucesso.')
             return redirect('view_scheduled_evaluations')
     else:
-        form = ScheduleForm()
+        form = ScheduleForm(user=request.user)  # Passa o usuário logado para o formulário
     return render(request, 'assessments/schedule_evaluation.html', {'form': form})
+
 
 @login_required
 def delete_selected_schedules(request):

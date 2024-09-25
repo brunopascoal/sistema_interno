@@ -11,6 +11,8 @@ class Question(models.Model):
     def __str__(self):
         return self.text
     
+# models.py
+
 class Work(models.Model):
     COMMITMENT_CHOICES = [
         ('Auditoria externa - Preliminar', 'Auditoria externa - Preliminar'),
@@ -27,7 +29,7 @@ class Work(models.Model):
         ('Revisão contábil', 'Revisão contábil'),
         ('Outros', 'Outros'),
     ]
-    name = models.CharField("Nome do Trabalho", max_length=255)
+    name = models.CharField("Nome do Trabalho", max_length=255, blank=True)  # Deixa o campo editável vazio inicialmente
     client = models.ForeignKey(Client, on_delete=models.CASCADE, verbose_name="Cliente")
     date_scheduled = models.DateField("Data Agendada")
     responsible = models.ForeignKey(
@@ -60,6 +62,14 @@ class Work(models.Model):
         blank=True,
         null=True
     )
+
+    def save(self, *args, **kwargs):
+        # Concatena as informações para o campo name antes de salvar
+        if not self.name:  # Apenas concatena se o nome estiver vazio
+            self.name = f"{self.client.name} - {self.date_scheduled} - {self.evaluator.get_full_name()} - {self.commitment}"
+        
+        super(Work, self).save(*args, **kwargs)
+
     def __str__(self):
         return f"{self.name} - {self.client.name}"
 
