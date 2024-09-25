@@ -31,8 +31,19 @@ def register_view(request):
 @user_passes_test(is_in_control_group)
 @login_required
 def list_users(request):
-    users = CustomUser.objects.all()
+    user = request.user
+
+    # Verifica se o usuário pertence ao grupo 'control_full'
+    if user.groups.filter(name='Controle Total').exists():
+        # Usuários do grupo 'control_full' podem ver todos os usuários
+        users = CustomUser.objects.all()
+    else:
+        # Usuários que não estão no grupo 'control_full' só podem ver usuários do mesmo departamento
+        department = user.department
+        users = CustomUser.objects.filter(department=department)
+
     return render(request, 'users/list_users.html', {'users': users})
+
 
 @user_passes_test(is_in_control_group)
 @login_required
