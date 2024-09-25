@@ -10,8 +10,8 @@ class Question(models.Model):
 
     def __str__(self):
         return self.text
-
-class EvaluationSchedule(models.Model):
+    
+class Work(models.Model):
     COMMITMENT_CHOICES = [
         ('Auditoria externa - Preliminar', 'Auditoria externa - Preliminar'),
         ('Auditoria externa - Controle Interno', 'Auditoria externa - Controle Interno'),
@@ -27,19 +27,63 @@ class EvaluationSchedule(models.Model):
         ('Revisão contábil', 'Revisão contábil'),
         ('Outros', 'Outros'),
     ]
+    name = models.CharField("Nome do Trabalho", max_length=255)
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, verbose_name="Cliente")
+    date_scheduled = models.DateField("Data Agendada")
+    responsible = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='works_responsible',
+        verbose_name="Responsável"
+    )
+    evaluator = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='works_evaluator',
+        verbose_name="Avaliador"
+    )
+    evaluatees = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name='works_evaluatees',
+        verbose_name="Avaliados"
+    )
+    commitment = models.CharField(
+        "Compromisso",
+        max_length=50,
+        choices=COMMITMENT_CHOICES,
+        blank=True,
+        null=True
+    )
+    other_commitment = models.CharField(
+        "Outro Compromisso",
+        max_length=255,
+        blank=True,
+        null=True
+    )
+    def __str__(self):
+        return f"{self.name} - {self.client.name}"
 
-    evaluator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='evaluation_schedules')
-    evaluatee = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='evaluation_scheduled')
-    client = models.ForeignKey(Client, on_delete=models.CASCADE)
-    department = models.ForeignKey(Department, on_delete=models.CASCADE, default=1)
-    role = models.ForeignKey(Role, on_delete=models.CASCADE, default=1)
-    date_scheduled = models.DateField()
-    self_evaluation = models.BooleanField(default=False)
-    commitment = models.CharField(max_length=50, choices=COMMITMENT_CHOICES)
-    other_commitment = models.CharField(max_length=255, blank=True, null=True)  # Campo para "Outros"
+# models.py (assessments)
+
+class EvaluationSchedule(models.Model):
+    work = models.ForeignKey(Work, on_delete=models.CASCADE, verbose_name="Trabalho", null=True, blank=True)
+    evaluator = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='evaluation_schedules',
+        verbose_name="Avaliador"
+    )
+    evaluatee = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='evaluation_scheduled',
+        verbose_name="Avaliado"
+    )
+    self_evaluation = models.BooleanField("Autoavaliação", default=False)
 
     def __str__(self):
-        return f"Evaluation scheduled by {self.evaluator} for {self.evaluatee} on {self.date_scheduled}"
+        return f"{self.evaluator.get_full_name()} avalia {self.evaluatee.get_full_name()} no trabalho {self.work.name}"
+
 
 
 class Evaluation(models.Model):

@@ -1,4 +1,7 @@
 from django.contrib.auth.models import Group
+from django import template
+
+register = template.Library()
 
 def control_group(request):
     # Verifica se o usuário está autenticado e se faz parte do grupo "Controle"

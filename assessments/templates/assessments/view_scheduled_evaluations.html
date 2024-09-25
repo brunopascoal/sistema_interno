@@ -1,7 +1,16 @@
 {% extends "base.html" %}
 {% load static %}
 {% block content %}
+
 <div class="container mt-5">
+  {% if messages %}
+  <ul class="messages">
+    {% for message in messages %}
+      <li class="alert alert-{{ message.tags }}">{{ message }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  
   <h2 class="text-center">Avaliações Agendadas</h2>
   
   {% if scheduled_evaluations %}
@@ -19,6 +28,7 @@
             <th class="sortable" onclick="sortTable(2)">Avaliado</th>
             <th class="sortable" onclick="sortTable(3)">Cliente</th>
             <th class="sortable" onclick="sortTable(4)">Data Agendada</th>
+            <th class="sortable" onclick="sortTable(5)">Trabalho</th>
             <th>Ações</th>
           </tr>
         </thead>
@@ -28,11 +38,19 @@
             <td><input type="checkbox" name="schedules" value="{{ schedule.id }}"></td>
             <td>{{ schedule.evaluator.first_name }} {{ schedule.evaluator.last_name }}</td> 
             <td>{{ schedule.evaluatee.first_name }} {{ schedule.evaluatee.last_name }}</td>
-            <td>{{ schedule.client.name }}</td>
-            <td>{{ schedule.date_scheduled|date:"d/m/Y" }}</td>
+            <td>{{ schedule.work.client.name }}</td>
+            <td>{{ schedule.work.date_scheduled|date:"d/m/Y" }}</td>
+            <td>{{ schedule.work.name }}</td>
             <td>
-              <a href="{% url 'edit_schedule' schedule.id %}" class="btn btn-primary">Editar</a>
+    <a href="{% url 'edit_evaluation_schedule' schedule.id %}" class="btn btn-primary btn-sm">
+        <i class="fa fa-edit"></i> Editar
+    </a>
+
+              <button type="button" class="btn btn-danger btn-sm" onclick="confirmDeletion({{ schedule.id }})">
+                <i class="fa fa-trash"></i> Excluir
+              </button>
             </td>
+            
           </tr>
           {% endfor %}
         </tbody>
@@ -48,9 +66,9 @@
 </div>
 
 <script>
-  // Script para selecionar todos os checkboxes
+  // Selecionar todos os checkboxes
   document.getElementById('select-all').onclick = function() {
-    var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    var checkboxes = document.querySelectorAll('input[name="schedules"]');
     for (var checkbox of checkboxes) {
       checkbox.checked = this.checked;
     }
@@ -75,7 +93,7 @@
   function sortTable(columnIndex) {
     var table = document.getElementById("scheduleTable");
     var rows = Array.from(table.rows).slice(1); // Ignora o cabeçalho
-    var ascending = table.getAttribute("data-sort-dir") === "asc";
+    var ascending = table.getAttribute("data-sort-dir") !== "asc";
     
     rows.sort(function(rowA, rowB) {
       var cellA = rowA.cells[columnIndex].innerText.toLowerCase();
@@ -94,12 +112,21 @@
     });
     
     // Insere as linhas ordenadas na tabela
+    var tbody = table.tBodies[0];
     rows.forEach(function(row) {
-      table.tBodies[0].appendChild(row);
+      tbody.appendChild(row);
     });
     
     // Alterna a direção da ordenação
-    table.setAttribute("data-sort-dir", ascending ? "desc" : "asc");
+    table.setAttribute("data-sort-dir", ascending ? "asc" : "desc");
+  }
+
+  // Confirmação de exclusão individual
+  function confirmDeletion(scheduleId) {
+    if (confirm('Tem certeza que deseja excluir este agendamento?')) {
+      window.location.href = "{% url 'delete_selected_schedules' %}?schedule_id=" + scheduleId;
+    }
   }
 </script>
+
 {% endblock %}

@@ -67,3 +67,8 @@ ENV/
 env.bak/
 venv.bak/
 teste.py
+
+#files
+backup.sql
+dados.json
+db copy.sqlite3

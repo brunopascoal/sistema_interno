@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-from .models import Client, CustomUser
+from .models import Client, CustomUser, Role, Department
 import re
 
 class ClientForm(forms.ModelForm):
@@ -74,14 +74,21 @@ class CustomUserChangeForm(UserChangeForm):
         label='E-mail',
         widget=forms.EmailInput(attrs={'class': 'form-control'})
     )
-    department = forms.CharField(
+    
+    # Para 'Department' usar ModelChoiceField
+    department = forms.ModelChoiceField(
+        queryset=Department.objects.all(),
         label='Departamento',
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        widget=forms.Select(attrs={'class': 'form-control'})
     )
-    role = forms.CharField(
+    
+    # Para 'Role' usar ModelChoiceField
+    role = forms.ModelChoiceField(
+        queryset=Role.objects.all(),
         label='Função',
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        widget=forms.Select(attrs={'class': 'form-control'})
     )
+    
     is_approved = forms.BooleanField(
         label='Aprovado',
         required=False,

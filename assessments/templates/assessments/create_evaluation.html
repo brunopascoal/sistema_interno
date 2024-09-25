@@ -11,8 +11,8 @@
         {% for schedule in pending_schedules %}
         <option value="{{ schedule.id }}">
           Avaliação para {{ schedule.evaluatee.first_name }}
-          {{schedule.evaluatee.last_name}} em {{schedule.client.name}} (Agendada
-          para {{ schedule.date_scheduled|date:"d/m/Y" }})
+          {{schedule.evaluatee.last_name}} em {{schedule.work.client.name}} (Agendada
+          para {{ schedule.work.date_scheduled|date:"d/m/Y" }} no trabalho {{ schedule.work.name }})
         </option>
         {% endfor %}
       </select>

@@ -1,10 +1,94 @@
 from django import forms
-from .models import EvaluationSchedule, Evaluation, Answer
+from .models import EvaluationSchedule, Evaluation, Answer, Work
 from accounts.models import CustomUser, Client
 
 
-# forms.py
+class ScheduleForm(forms.ModelForm):
+    COMMITMENT_CHOICES = [
+        ('Auditoria externa - Preliminar', 'Auditoria externa - Preliminar'),
+        ('Auditoria externa - Controle Interno', 'Auditoria externa - Controle Interno'),
+        ('Auditoria externa - Final', 'Auditoria externa - Final'),
+        ('Inventário', 'Inventário'),
+        ('Serviços Financeiros', 'Serviços Financeiros'),
+        ('Auditoria Interna', 'Auditoria Interna'),
+        ('Incorporação', 'Incorporação'),
+        ('Auditoria Cooperativa', 'Auditoria Cooperativa'),
+        ('Demonstrações Financeiras - Final', 'Demonstrações Financeiras - Final'),
+        ('Demonstrações Financeiras - Preliminar', 'Demonstrações Financeiras - Preliminar'),
+        ('Auditoria contínua', 'Auditoria contínua'),
+        ('Revisão contábil', 'Revisão contábil'),
+        ('Outros', 'Outros'),
+    ]
 
+    class Meta:
+        model = Work
+        fields = ['name', 'client', 'date_scheduled', 'responsible', 'evaluator', 'commitment', 'other_commitment', 'evaluatees']
+
+    # Para widgets personalizados
+    client = forms.ModelChoiceField(
+        queryset=Client.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        label='Cliente'
+    )
+    date_scheduled = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-select'}),
+        label='Data Agendada'
+    )
+    responsible = forms.ModelChoiceField(
+        queryset=CustomUser.objects.filter(is_active=True),
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        label='Responsável'
+    )
+    
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super(ScheduleForm, self).__init__(*args, **kwargs)
+    
+        if user:
+            # Filtrar avaliadores e avaliados pelo departamento do usuário logado e excluir usuários sem departamento
+            department = user.department
+            if department:
+                self.fields['evaluator'].queryset = CustomUser.objects.filter(is_active=True, department=department).exclude(department__isnull=True)
+                self.fields['evaluatees'].queryset = CustomUser.objects.filter(is_active=True, department=department).exclude(department__isnull=True)
+            else:
+                # Caso o usuário logado não tenha um departamento, você pode lidar com isso conforme a sua necessidade
+                self.fields['evaluator'].queryset = CustomUser.objects.none()
+                self.fields['evaluatees'].queryset = CustomUser.objects.none()
+
+    evaluator = forms.ModelChoiceField(
+        queryset=CustomUser.objects.filter(is_active=True),
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        label='Avaliador'
+    )
+    
+    evaluatees = forms.ModelMultipleChoiceField(
+        queryset=CustomUser.objects.filter(is_active=True),
+        widget=forms.SelectMultiple(attrs={'class': 'form-select'}),
+        label='Avaliados'
+    )
+
+    commitment = forms.ChoiceField(
+        choices=COMMITMENT_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        label='Compromisso'
+    )
+    other_commitment = forms.CharField(
+        max_length=255,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        label='Outro Compromisso'
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        commitment = cleaned_data.get('commitment')
+        other_commitment = cleaned_data.get('other_commitment')
+
+        if commitment == 'Outros' and not other_commitment:
+            self.add_error('other_commitment', 'Por favor, especifique o compromisso.')
+
+
+        
 class EvaluationScheduleForm(forms.Form):
     evaluator = forms.ModelChoiceField(
         queryset=CustomUser.objects.none(),

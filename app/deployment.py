@@ -33,10 +33,6 @@ DATABASES = {
         'HOST': conn_str_params['host'],
         'USER': conn_str_params['user'],
         'PASSWORD': conn_str_params['password'],
-<<<<<<< HEAD
-        'PORT': conn_str_params.get('port', '5432'),        
-=======
->>>>>>> a2d4395 (Raw: Correção no project name no wsgi.py)
         'PORT': conn_str_params.get('port', '5432'),        
     }
 }

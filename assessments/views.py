@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
-from .forms import EvaluationScheduleForm, AnalysisForm
-from .models import EvaluationSchedule, Evaluation, Answer, Question
+from .forms import AnalysisForm, ScheduleForm, EvaluationScheduleForm
+from .models import EvaluationSchedule, Evaluation, Answer, Question, Work
 from accounts.models import CustomUser
 from django.http import JsonResponse
 import pandas as pd
@@ -21,38 +21,47 @@ def is_in_agendamento_group(user):
 
 # views.py
 
+
 @login_required
 @user_passes_test(is_in_agendamento_group)
 def schedule_evaluation(request):
-
     if request.method == 'POST':
-        form = EvaluationScheduleForm(request.POST, user=request.user)
+        form = ScheduleForm(request.POST)
         if form.is_valid():
-            evaluator = form.cleaned_data['evaluator']
-            evaluatees = form.cleaned_data['evaluatee']
-            client = form.cleaned_data['client']
-            date_scheduled = form.cleaned_data['date_scheduled']
+            # Criar o Work com os novos campos
+            work = Work.objects.create(
+                name=form.cleaned_data['name'],
+                client=form.cleaned_data['client'],
+                date_scheduled=form.cleaned_data['date_scheduled'],
+                responsible=form.cleaned_data['responsible'],
+                evaluator=form.cleaned_data['evaluator'],
+                commitment=form.cleaned_data['commitment'],
+                other_commitment=form.cleaned_data['other_commitment'],
+            )
+            work.evaluatees.set(form.cleaned_data['evaluatees'])
 
-            for evaluatee in evaluatees:
-                schedule = EvaluationSchedule(
-                    evaluator=evaluator,
+            # Criar agendamento onde o responsável avalia o avaliador
+            EvaluationSchedule.objects.create(
+                work=work,
+                evaluator=work.responsible,
+                evaluatee=work.evaluator,
+                self_evaluation=False
+            )
+
+            # Criar agendamentos onde o avaliador avalia os avaliados
+            for evaluatee in work.evaluatees.all():
+                EvaluationSchedule.objects.create(
+                    work=work,
+                    evaluator=work.evaluator,
                     evaluatee=evaluatee,
-                    client=client,
-                    date_scheduled=date_scheduled,
-                    department=request.user.department,
-                    role=request.user.role,
+                    self_evaluation=False
                 )
-                if evaluator == evaluatee:
-                    schedule.self_evaluation = True
-                schedule.save()
 
+            messages.success(request, 'Agendamentos criados com sucesso.')
             return redirect('view_scheduled_evaluations')
     else:
-        form = EvaluationScheduleForm(user=request.user)
-
+        form = ScheduleForm()
     return render(request, 'assessments/schedule_evaluation.html', {'form': form})
-
-
 
 @login_required
 def delete_selected_schedules(request):
@@ -77,40 +86,76 @@ def create_evaluation(request):
         if schedule_id:
             schedule = get_object_or_404(EvaluationSchedule, id=schedule_id)
 
-            # Criação da avaliação (autoavaliação ou regular)
+            # Criação da avaliação
             evaluation = Evaluation.objects.create(schedule=schedule, role_at_time=schedule.evaluatee.role)
+
+            # Obter o tipo de papel e departamento do avaliado
             role_type = schedule.evaluatee.role.role_type
-            questions = Question.objects.filter(department=schedule.department, role_type=role_type)
+            department = schedule.evaluatee.department
+
+            # Obter as perguntas baseadas no departamento e tipo de papel
+            questions = Question.objects.filter(department=department, role_type=role_type)
+
+            # Processar as respostas
             for question in questions:
                 score = request.POST.get(f'question_{question.id}')
                 comment = request.POST.get(f'comment_{question.id}')
-                Answer.objects.create(evaluation=evaluation, question=question, score=score, comment=comment)
-                
+                if score:  # Verifica se a pontuação foi fornecida
+                    Answer.objects.create(evaluation=evaluation, question=question, score=score, comment=comment)
+                else:
+                    messages.error(request, f"A pontuação para a pergunta '{question.text}' é obrigatória.")
+                    return redirect('create_evaluation')  # Redireciona ou trata o erro adequadamente
+
+            messages.success(request, "Avaliação criada com sucesso.")
             return redirect('view_evaluations')
     
     return render(request, 'assessments/create_evaluation.html', {
         'pending_schedules': pending_schedules,
     })
 
-@login_required
-def edit_schedule(request, schedule_id):
-    schedule = get_object_or_404(EvaluationSchedule, id=schedule_id)
 
-    # Verifique se o usuário tem permissão para editar
-    if request.user != schedule.evaluator and not request.user.groups.filter(name='Gestão').exists():
-        messages.error(request, 'Você não tem permissão para editar este agendamento.')
-        return redirect('view_scheduled_evaluations')
+@login_required
+@user_passes_test(is_in_agendamento_group)
+def edit_evaluation_schedule(request, schedule_id):
+    schedule = get_object_or_404(EvaluationSchedule, id=schedule_id)
+    work = schedule.work
 
     if request.method == 'POST':
-        form = EvaluationScheduleForm(request.POST, instance=schedule, user=request.user)
+        form = ScheduleForm(request.POST)
         if form.is_valid():
-            form.save()
+            # Atualizar os campos manualmente
+            work.name = form.cleaned_data['name']
+            work.client = form.cleaned_data['client']
+            work.date_scheduled = form.cleaned_data['date_scheduled']
+            work.responsible = form.cleaned_data['responsible']
+            work.evaluator = form.cleaned_data['evaluator']
+            work.commitment = form.cleaned_data['commitment']
+            work.other_commitment = form.cleaned_data['other_commitment']
+            work.save()
+
+            # Atualizar os avaliados
+            work.evaluatees.set(form.cleaned_data['evaluatees'])
+
+            # Atualizar os agendamentos
             messages.success(request, 'Agendamento atualizado com sucesso.')
             return redirect('view_scheduled_evaluations')
     else:
-        form = EvaluationScheduleForm(instance=schedule, user=request.user)
+        # Preencher o formulário manualmente com os dados existentes
+        initial_data = {
+            'name': work.name,
+            'client': work.client,
+            'date_scheduled': work.date_scheduled,
+            'responsible': work.responsible,
+            'evaluator': work.evaluator,
+            'commitment': work.commitment,
+            'other_commitment': work.other_commitment,
+            'evaluatees': work.evaluatees.all(),
+        }
+        form = ScheduleForm(initial=initial_data)
 
-    return render(request, 'assessments/edit_schedule.html', {'form': form, 'schedule': schedule})
+    return render(request, 'assessments/edit_evaluation_schedule.html', {'form': form, 'schedule': schedule})
+
+
 
 @login_required
 def view_evaluations(request):
@@ -129,16 +174,22 @@ def view_evaluations(request):
 
 @login_required
 def view_scheduled_evaluations(request):
-    is_in_control_group = request.user.groups.filter(name='Agendamento').exists()
+    user_department = request.user.department
 
-    if is_in_control_group:
-        scheduled_evaluations = EvaluationSchedule.objects.filter(evaluation__isnull=True)
-    else:
-        scheduled_evaluations = EvaluationSchedule.objects.filter(evaluation__isnull=True, evaluator=request.user)
+    if not user_department:
+        messages.error(request, "Você não possui um departamento associado. Entre em contato com o administrador.")
+        return redirect('homepage')  # Ou outra página apropriada
+
+    scheduled_evaluations = EvaluationSchedule.objects.filter(
+        evaluation__isnull=True,
+        evaluatee__department=user_department
+    )
+
+    if not scheduled_evaluations.exists():
+        messages.info(request, "Não há avaliações agendadas para o seu departamento.")
 
     return render(request, 'assessments/view_scheduled_evaluations.html', {
         'scheduled_evaluations': scheduled_evaluations,
-        'is_in_control_group': is_in_control_group,  # Passando o valor para o template
     })
 
 
@@ -154,10 +205,18 @@ def evaluation_detail(request, evaluation_id):
 @login_required
 def get_questions(request, schedule_id):
     schedule = get_object_or_404(EvaluationSchedule, id=schedule_id)
+
+    # Verifica se o avaliado tem um papel e departamento
+    if not schedule.evaluatee.role or not schedule.evaluatee.department:
+        return JsonResponse({'error': 'O avaliado não possui um papel ou departamento definido.'}, status=400)
+
     role_type = schedule.evaluatee.role.role_type
-    questions = Question.objects.filter(department=schedule.department, role_type=role_type)
+    department = schedule.evaluatee.department
+
+    questions = Question.objects.filter(department=department, role_type=role_type)
     questions_data = [{'id': question.id, 'text': question.text} for question in questions]
     return JsonResponse({'questions': questions_data})
+
 
 @login_required
 def export_evaluation(request, evaluation_id):
