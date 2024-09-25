@@ -1832,14 +1832,6 @@
 },
 {
     "model": "contenttypes.contenttype",
-    "pk": 5,
-    "fields": {
-        "app_label": "sessions",
-        "model": "session"
-    }
-},
-{
-    "model": "contenttypes.contenttype",
     "pk": 6,
     "fields": {
         "app_label": "accounts",
