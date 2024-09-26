@@ -381,6 +381,8 @@ def analysis(request):
 
             # Criação do DataFrame e do gráfico com Altair
             df = pd.DataFrame(data)
+            table_data = df.to_dict('records')
+
 
             if not df.empty:  # Verifica se há dados para gerar o gráfico
                 # Definir uma escala de cores personalizada
@@ -390,7 +392,7 @@ def analysis(request):
                 )
 
                 chart = alt.Chart(df).mark_bar().encode(
-                    x=alt.X('Pergunta:N', title=None, axis=alt.Axis(labelAngle=-45)),
+                    x=alt.X('Pergunta:N', title=None, axis=None),
                     y=alt.Y('Média:Q', title=None),
                     color=alt.Color('Tipo:N', scale=color_scale, legend=alt.Legend(title="Tipo")),
                     xOffset='Tipo:N',  # Isso permite o deslocamento das barras para o mesmo eixo x
@@ -405,7 +407,7 @@ def analysis(request):
             else:
                 chart_json = None  # Nenhum dado, nenhum gráfico a ser gerado
 
-            return render(request, 'assessments/analysis.html', {'form': form, 'chart': mark_safe(chart_json)})
+            return render(request, 'assessments/analysis.html', {'form': form, 'chart': mark_safe(chart_json), 'table_data': table_data})
 
     else:
         # Inicializamos o formulário vazio no caso de GET
