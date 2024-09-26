@@ -1,11 +1,8 @@
-<!-- templates/assessments/schedule_evaluation.html -->
-
 {% extends 'base.html' %}
 
 {% block content %}
-
-
-<h2>Agendar Avaliações</h2>
+<br>
+<h2 class="text-center">Agendar Avaliações</h2>
 <form method="post">
     {% csrf_token %}
     <div class="form-group">
@@ -23,8 +20,26 @@
     <div class="form-group">
         {{ form.evaluator.label_tag }} {{ form.evaluator }}
     </div>
+    <!-- Only apply the custom dropdown styling to the evaluatees field -->
     <div class="form-group">
-        {{ form.evaluatees.label_tag }} {{ form.evaluatees }}
+        {{ form.evaluatees.label_tag }}
+        <!-- Custom dropdown for evaluatees -->
+        <div class="custom-dropdown-evaluatees">
+            <button type="button" class="dropdown-toggle" id="dropdownBtn">Selecionar Avaliados</button>
+            <div class="dropdown-menu" id="dropdownMenu" style="display: none;">
+                <input type="text" id="searchEvaluatees" placeholder="Pesquisar usuários..." class="form-control">
+                <div id="evaluatees-list" style="max-height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 10px;">
+                    {% for user in form.evaluatees.field.queryset %}
+                        <div>
+                            <label>
+                                <input type="checkbox" name="evaluatees" value="{{ user.id }}">
+                                {{ user.username }}
+                            </label>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
     </div>
     <div class="form-group">
         {{ form.commitment.label_tag }} {{ form.commitment }}
@@ -32,11 +47,76 @@
     <div class="form-group" id="other-commitment-field" style="display: none;">
         {{ form.other_commitment.label_tag }} {{ form.other_commitment }}
     </div>
-    <button type="submit" class="btn btn-primary">Agendar</button>
+    <br>
+    <button type="submit" class="btn btn-primary mb-4 w-100">Agendar</button>
 </form>
 
+<!-- CSS for dropdown style specific to the evaluatees field -->
+<style>
+    /* Styles only for the evaluatees dropdown */
+    .custom-dropdown-evaluatees {
+        position: relative;
+        display: inline-block;
+        width: 100%;
+    }
+
+    .custom-dropdown-evaluatees .dropdown-toggle {
+        width: 100%;
+        padding: 10px;
+        background-color: #f8f9fa;
+        border: 1px solid #ccc;
+        cursor: pointer;
+    }
+
+    .custom-dropdown-evaluatees .dropdown-menu {
+        position: absolute;
+        width: 100%;
+        background-color: white;
+        border: 1px solid #ccc;
+        z-index: 1;
+    }
+</style>
+
+<!-- JavaScript for dropdown behavior and search specific to the evaluatees field -->
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    // Toggle the dropdown menu on button click (only for evaluatees)
+    document.getElementById('dropdownBtn').addEventListener('click', function () {
+        var dropdownMenu = document.getElementById('dropdownMenu');
+        if (dropdownMenu.style.display === 'none') {
+            dropdownMenu.style.display = 'block';
+        } else {
+            dropdownMenu.style.display = 'none';
+        }
+    });
+
+    // Hide dropdown menu if clicked outside (only for evaluatees)
+    document.addEventListener('click', function (event) {
+        var dropdownMenu = document.getElementById('dropdownMenu');
+        var dropdownBtn = document.getElementById('dropdownBtn');
+        if (!dropdownBtn.contains(event.target) && !dropdownMenu.contains(event.target)) {
+            dropdownMenu.style.display = 'none';
+        }
+    });
+
+    // Function to filter evaluatees (only for evaluatees)
+    document.getElementById('searchEvaluatees').addEventListener('keyup', function () {
+        var filter = this.value.toLowerCase();
+        var evaluateesList = document.getElementById('evaluatees-list');
+        var evaluatees = evaluateesList.getElementsByTagName('div');
+
+        for (var i = 0; i < evaluatees.length; i++) {
+            var label = evaluatees[i].getElementsByTagName('label')[0];
+            var textValue = label.textContent || label.innerText;
+            if (textValue.toLowerCase().indexOf(filter) > -1) {
+                evaluatees[i].style.display = '';
+            } else {
+                evaluatees[i].style.display = 'none';
+            }
+        }
+    });
+
+    // Existing script for commitment field (no changes needed here)
+    document.addEventListener('DOMContentLoaded', function () {
         var commitmentField = document.getElementById('id_commitment');
         var otherCommitmentField = document.getElementById('other-commitment-field');
         var otherCommitmentInput = document.getElementById('id_other_commitment');
@@ -56,4 +136,5 @@
         toggleOtherCommitment();
     });
 </script>
+
 {% endblock %}

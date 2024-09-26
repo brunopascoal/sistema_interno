@@ -30,7 +30,9 @@ class ScheduleForm(forms.ModelForm):
     client = forms.ModelChoiceField(
         queryset=Client.objects.all(),
         widget=forms.Select(attrs={'class': 'form-select'}),
-        label='Cliente'
+        label='Cliente',
+        empty_label="Selecione o Cliente"  # Remove a opção vazia
+
     )
     date_scheduled = forms.DateField(
         widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-select'}),
@@ -39,13 +41,18 @@ class ScheduleForm(forms.ModelForm):
     responsible = forms.ModelChoiceField(
         queryset=CustomUser.objects.filter(is_active=True),
         widget=forms.Select(attrs={'class': 'form-select'}),
-        label='Responsável'
+        label='Responsável',
+        empty_label="Selecione o Responsável"  # Remove a opção vazia
+
     )
+    
     
     evaluator = forms.ModelChoiceField(
         queryset=CustomUser.objects.filter(is_active=True),
         widget=forms.Select(attrs={'class': 'form-select'}),
-        label='Avaliador'
+        label='Encarregado',
+        empty_label="Selecione o Encarregado"  # Remove a opção vazia
+
     )
     
     evaluatees = forms.ModelMultipleChoiceField(
